@@ -1,0 +1,13 @@
+version: "3.3"
+
+networks:
+  main-network:
+    driver: bridge
+
+
+services:
+  redis:
+    image: redis
+    command: ["redis-server"]
+    ports:
+      - "6379:6379"

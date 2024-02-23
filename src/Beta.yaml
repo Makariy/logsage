@@ -1,0 +1,858 @@
+openapi: 3.0.3
+info:
+  title: Beta
+  version: 0.0.1
+
+
+servers:
+  - url: http://localhost:8000
+
+
+components:
+  schemas:
+    authToken:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Token will be used in auth-required API endpoints
+
+    responseStatus:
+      type: string
+
+    errorAuthRequired:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - "Authorization required"
+
+    errorResponse:
+      type: object
+      properties:
+        status:
+          $ref: "#/components/schemas/responseStatus"
+
+
+    user:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        lastLogin:
+          type: number
+
+
+    currency:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - FIAT
+            - CRYPTO
+        symbol:
+          type: string
+
+    currencyList:
+      type: array
+      items:
+        $ref: "#/components/schemas/currency"
+
+
+    account:
+      type: object
+      properties:
+        name:
+          type: string
+        currency:
+          $ref: "#/components/schemas/currency"
+        balance:
+          type: number
+
+    accountsList:
+      type: array
+      items:
+        $ref: "#/components/schemas/account"
+
+
+
+    categoryType:
+      type: string
+      enum:
+        - SPENDING
+        - EARNING
+
+    category:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          $ref: "#/components/schemas/categoryType"
+
+    categoriesList:
+      type: array
+      items:
+        $ref: "#/components/schemas/category"
+
+
+
+
+    transaction:
+      type: object
+      properties:
+        account:
+          $ref: "#/components/schemas/account"
+        date:
+          type: number
+        amount:
+          type: number
+        category:
+          $ref: "#/components/schemas/category"
+        description:
+          type: string
+
+    transactionsList:
+      type: array
+      items:
+        $ref: "#/components/schemas/transaction"
+
+
+
+    categoryStats:
+      type: object
+      properties:
+        totalAmount:
+          type: number
+        totalPercent:
+          description: Relative amount respect to the total by all categories
+          type: number
+        category:
+          $ref: "#/components/schemas/category"
+        transactions:
+          $ref: "#/components/schemas/transactionsList"
+
+    totalStats:
+      type: object
+      properties:
+        totalEarnedAmount:
+          type: number
+        totalSpentAmount:
+          type: number
+        accounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/accountsList"
+        categoriesStats:
+          $ref: "#/components/schemas/categoryStats"
+
+
+
+paths:
+  /auth/login/:
+    post:
+      summary: Login
+
+      parameters:
+        - name: email
+          in: query
+          schema:
+            type: string
+        - name: password
+          in: query
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: Login succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user"
+
+        '403':
+          description: |-
+            Permission denied. 
+            Maybe you specified incorrect credentials 
+            or the user does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+  /auth/signup/:
+    post:
+      summary: Sign up
+      parameters:
+        - name: email
+          in: query
+          schema:
+            type: string
+        - name: password
+          in: query
+          schema:
+            type: string
+
+      responses:
+        '201':
+          description: Signed up. User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user"
+
+        '400':
+          description: |-
+            Incorrect request. User may not exist, 
+            or the fields are incorrect
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+  /auth/logout/:
+    summary: Log out
+    post:
+      responses:
+        '200':
+          description: Successfully logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+
+  /auth/me/:
+    get:
+      summary: Get information about the currently logged in user
+      responses:
+        '200':
+          description: Request succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+
+
+  /currency/all/:
+    get:
+      summary: Get all available currencies
+      responses:
+        '200':
+          description: Request succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/currencyList"
+
+
+  /account/all/:
+    get:
+      summary: Get information about all the user accounts
+      responses:
+        '200':
+          description: Request succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/accountsList"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+  /account/get/{uuid}/:
+    get:
+      summary: Get information about the account by uuid
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: Request succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/account"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+  /account/create/:
+    post:
+      summary: Create a new account
+      parameters:
+        - $ref: "#/components/schemas/account"
+
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/account"
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+
+  /account/patch/{uuid}/:
+    patch:
+      summary: Patch account
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+        - $ref: "#/components/schemas/account"
+
+      responses:
+        '200':
+          description: Patched correctly
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  account:
+                    $ref: "#/components/schemas/account"
+                  status:
+                    $ref: "#/components/schemas/responseStatus"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+  /account/delete/{uuid}/:
+    post:
+      summary: Delete account
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: Deleted correctly
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  account:
+                    $ref: "#/components/schemas/account"
+                  status:
+                    $ref: "#/components/schemas/responseStatus"
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+
+
+
+  /category/all/:
+    get:
+      summary: Get information about all the user categories
+      responses:
+        '200':
+          description: Request succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/categoriesList"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+  /category/get/{uuid}/:
+    get:
+      summary: Get information about the category by uuid
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: Request succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/category"
+
+        '404':
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+  /category/create/:
+    post:
+      summary: Create a new category
+      parameters:
+        - $ref: "#/components/schemas/category"
+
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/category"
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+
+  /category/patch/{uuid}/:
+    post:
+      summary: Patch category
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+        - $ref: "#/components/schemas/category"
+
+      responses:
+        '200':
+          description: Patched correctly
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  account:
+                    $ref: "#/components/schemas/category"
+                  status:
+                    $ref: "#/components/schemas/responseStatus"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+  /category/delete/{uuid}/:
+    post:
+      summary: Delete category
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: Deleted correctly
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  account:
+                    $ref: "#/components/schemas/category"
+                  status:
+                    $ref: "#/components/schemas/responseStatus"
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+
+
+
+  /transaction/all/:
+    get:
+      summary: Get information about all the user transactions
+      responses:
+        '200':
+          description: Request succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/transactionsList"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+  /transaction/get/{uuid}:
+    get:
+      summary: Get information about the transaction by uuid
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: Request succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/transaction"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+  /transaction/create/:
+    post:
+      summary: Create a new transaction
+      parameters:
+        - $ref: "#/components/schemas/transaction"
+
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/transaction"
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+
+  /transaction/patch/{uuid}/:
+    post:
+      summary: Patch transaction
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+        - $ref: "#/components/schemas/transaction"
+
+      responses:
+        '200':
+          description: Patched correctly
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  account:
+                    $ref: "#/components/schemas/transaction"
+                  status:
+                    $ref: "#/components/schemas/responseStatus"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+  /transaction/delete/{uuid}/:
+    post:
+      summary: Delete transaction
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: Deleted correctly
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  account:
+                    $ref: "#/components/schemas/transaction"
+                  status:
+                    $ref: "#/components/schemas/responseStatus"
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+
+
+
+  /stats/category/{uuid}/:
+    get:
+      description: Get analytics for category by uuid
+      parameters:
+        - name: uuid
+          in: path
+          description: Category uuid
+          schema:
+            type: string
+        - name: from
+          in: query
+          description: Date from
+          schema:
+            type: number
+            required: false
+        - name: to
+          in: query
+          description: Date to
+          schema:
+            type: number
+            required: false
+
+      responses:
+        '200':
+          description: Request succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  category:
+                    $ref: "#/components/schemas/category"
+                  stats:
+                    $ref: "#/components/schemas/categoryStats"
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+
+  /stats/account/{uuid}/:
+    get:
+      description: Get analytics for account by uuid
+      parameters:
+        - name: uuid
+          in: path
+          description: Account uuid
+          schema:
+            type: string
+        - name: from
+          in: query
+          description: Date from
+          schema:
+            type: number
+            required: false
+        - name: to
+          in: query
+          description: Date to
+          schema:
+            type: number
+            required: false
+
+      responses:
+        '200':
+          description: Request succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  account:
+                    $ref: "#/components/schemas/account"
+                  stats:
+                    $ref: "#/components/schemas/totalStats"
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+
+  /stats/all/:
+    get:
+      description: Get all analytics
+      parameters:
+        - name: from
+          in: query
+          description: Date from
+          schema:
+            type: number
+            required: false
+        - name: to
+          in: query
+          description: Date to
+          schema:
+            type: number
+            required: false
+
+      responses:
+        '200':
+          description: Request succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stats:
+                    $ref: "#/components/schemas/totalStats"
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
+
