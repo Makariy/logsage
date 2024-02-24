@@ -1,7 +1,12 @@
 openapi: 3.0.3
 info:
-  title: Beta
+  title: LogSage
   version: 0.0.1
+  description: |-
+    LogSage API.
+    Describes the interface to interact with authorization,
+    LogSage currencies, user accounts, categories, transactions
+    and finance analytics. 
 
 
 servers:
@@ -131,10 +136,29 @@ components:
         totalAmount:
           type: number
         totalPercent:
-          description: Relative amount respect to the total by all categories
+          description: Relative amount relative to the total by all categories
           type: number
         category:
           $ref: "#/components/schemas/category"
+        transactions:
+          $ref: "#/components/schemas/transactionsList"
+
+
+    accountStats:
+      type: object
+      properties:
+        totalEarnedAmount:
+          type: number
+        totalEarnedPercent:
+          type: number
+          description: Relative amount relative to the total earning
+        totalSpentAmount:
+          type: number
+        totalSpentPercent:
+          type: number
+          description: Relative amount relative to the total spending
+        account:
+          $ref: "#/components/schemas/accountsList"
         transactions:
           $ref: "#/components/schemas/transactionsList"
 
@@ -145,12 +169,14 @@ components:
           type: number
         totalSpentAmount:
           type: number
-        accounts:
+        accountsStats:
           type: array
           items:
-            $ref: "#/components/schemas/accountsList"
+            $ref: "#/components/schemas/accountStats"
         categoriesStats:
-          $ref: "#/components/schemas/categoryStats"
+          type: array
+          items:
+            $ref: "#/components/schemas/categoryStats"
 
 
 
@@ -218,8 +244,8 @@ paths:
                 $ref: "#/components/schemas/errorResponse"
 
   /auth/logout/:
-    summary: Log out
     post:
+      summary: Log out
       responses:
         '200':
           description: Successfully logged out
@@ -796,7 +822,7 @@ paths:
                   account:
                     $ref: "#/components/schemas/account"
                   stats:
-                    $ref: "#/components/schemas/totalStats"
+                    $ref: "#/components/schemas/accountStats"
 
         '400':
           description: Bad request
