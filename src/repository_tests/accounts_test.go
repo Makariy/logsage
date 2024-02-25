@@ -29,21 +29,8 @@ func (suite *AccountRepositorySuit) TearDownTest() {
 	test_utils.DropTestDB()
 }
 
-func createTestAccount(suite *AccountRepositorySuit) *models.Account {
-	account, err := repository.CreateAccount(
-		suite.user.ID,
-		accountName,
-		accountBalance,
-		suite.currency.ID,
-	)
-	if err != nil {
-		suite.Error(err, "could not create account")
-	}
-	return account
-}
-
 func (suite *AccountRepositorySuit) TestCreateAccount() {
-	account := createTestAccount(suite)
+	account := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
 
 	expected := models.Account{
 		ID:       1,
@@ -61,7 +48,7 @@ func (suite *AccountRepositorySuit) TestPatchAccount() {
 		newAccountName = "New test account name"
 		newBalance     = decimal.New(2000, 10)
 	)
-	account := createTestAccount(suite)
+	account := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
 	patched, err := repository.PatchAccount(account.ID, newAccountName, newBalance, account.CurrencyID, suite.user.ID)
 	if err != nil {
 		suite.Error(err)
@@ -78,7 +65,7 @@ func (suite *AccountRepositorySuit) TestPatchAccount() {
 }
 
 func (suite *AccountRepositorySuit) TestGetAccountByID() {
-	account := createTestAccount(suite)
+	account := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
 
 	foundAccount, err := repository.GetAccountByID(account.ID)
 	if err != nil {
@@ -91,7 +78,7 @@ func (suite *AccountRepositorySuit) TestGetAccountByID() {
 func (suite *AccountRepositorySuit) TestGetUserAccounts() {
 	secondBalance := decimal.New(200, 10)
 
-	first := createTestAccount(suite)
+	first := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
 	second, err := repository.CreateAccount(
 		suite.user.ID,
 		"Second account",
@@ -124,7 +111,7 @@ func (suite *AccountRepositorySuit) TestGetUserAccounts() {
 }
 
 func (suite *AccountRepositorySuit) TestDeleteAccount() {
-	account := createTestAccount(suite)
+	account := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
 
 	result, err := repository.DeleteAccount(account.ID)
 	if err != nil {

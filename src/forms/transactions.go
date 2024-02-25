@@ -10,6 +10,7 @@ type TransactionForm struct {
 	Amount      decimal.Decimal `json:"amount" form:"amount"`
 	Date        time.Time       `json:"date" form:"date"`
 	CategoryID  uint            `json:"categoryId" form:"categoryId"`
+	AccountID   uint            `json:"accountID" form:"accountID"`
 }
 
 type TransactionResponse struct {
@@ -19,6 +20,7 @@ type TransactionResponse struct {
 	Amount      decimal.Decimal  `json:"amount"`
 	Date        time.Time        `json:"date"`
 	Category    CategoryResponse `json:"category"`
+	Account     AccountResponse  `json:"account"`
 }
 
 type TransactionsResponse struct {

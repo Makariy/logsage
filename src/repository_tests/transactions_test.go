@@ -17,6 +17,7 @@ type TransactionRepositorySuit struct {
 	user     *models.User
 	currency *models.Currency
 	category *models.Category
+	account  *models.Account
 }
 
 func (suite *TransactionRepositorySuit) SetupTest() {
@@ -26,6 +27,7 @@ func (suite *TransactionRepositorySuit) SetupTest() {
 	suite.user = CreateTestUser(userEmail, userPassword)
 	suite.currency = CreateTestCurrency(currencyName)
 	suite.category = CreateTestCategory(suite.user.ID, categoryName, categoryType)
+	suite.account = CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
 }
 
 func (suite *TransactionRepositorySuit) TearDownTest() {
@@ -39,6 +41,7 @@ func (suite *TransactionRepositorySuit) TestCreateTransaction() {
 		transactionDate,
 		suite.user.ID,
 		suite.category.ID,
+		suite.account.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -51,6 +54,7 @@ func (suite *TransactionRepositorySuit) TestCreateTransaction() {
 		Date:        transactionDate,
 		User:        *suite.user,
 		Category:    *suite.category,
+		Account:     *suite.account,
 	}
 
 	testTransactionsEqual(&expected, transaction, &suite.Suite)
@@ -63,6 +67,7 @@ func (suite *TransactionRepositorySuit) TestGetTransactionByID() {
 		transactionDate,
 		suite.user.ID,
 		suite.category.ID,
+		suite.account.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -80,6 +85,7 @@ func (suite *TransactionRepositorySuit) TestGetTransactionByID() {
 		Date:        transaction.Date,
 		User:        transaction.User,
 		Category:    transaction.Category,
+		Account:     transaction.Account,
 	}
 
 	testTransactionsEqual(&expected, result, &suite.Suite)
@@ -92,6 +98,7 @@ func (suite *TransactionRepositorySuit) TestGetAllTransactions() {
 		transactionDate,
 		suite.user.ID,
 		suite.category.ID,
+		suite.account.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -102,6 +109,7 @@ func (suite *TransactionRepositorySuit) TestGetAllTransactions() {
 		time.Now(),
 		suite.user.ID,
 		suite.category.ID,
+		suite.account.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -134,6 +142,7 @@ func (suite *TransactionRepositorySuit) TestPatchTransaction() {
 		transactionDate,
 		suite.user.ID,
 		suite.category.ID,
+		suite.account.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -145,7 +154,15 @@ func (suite *TransactionRepositorySuit) TestPatchTransaction() {
 		newDate        = time.Now()
 	)
 
-	patched, err := repository.PatchTransaction(transaction.ID, newDescription, newAmount, newDate, suite.user.ID, suite.category.ID)
+	patched, err := repository.PatchTransaction(
+		transaction.ID,
+		newDescription,
+		newAmount,
+		newDate,
+		suite.user.ID,
+		suite.category.ID,
+		suite.account.ID,
+	)
 	if err != nil {
 		suite.Error(err)
 	}
@@ -157,6 +174,7 @@ func (suite *TransactionRepositorySuit) TestPatchTransaction() {
 		Date:        newDate,
 		User:        transaction.User,
 		Category:    transaction.Category,
+		Account:     transaction.Account,
 	}
 
 	testTransactionsEqual(&expected, patched, &suite.Suite)
@@ -169,6 +187,7 @@ func (suite *TransactionRepositorySuit) TestDeleteTransaction() {
 		transactionDate,
 		suite.user.ID,
 		suite.category.ID,
+		suite.account.ID,
 	)
 	if err != nil {
 		suite.Error(err)

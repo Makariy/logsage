@@ -1,6 +1,7 @@
 package repository_tests
 
 import (
+	"github.com/shopspring/decimal"
 	"main/models"
 	"main/repository"
 )
@@ -27,4 +28,17 @@ func CreateTestCategory(userID uint, categoryName string, categoryType string) *
 		panic("could not create test category")
 	}
 	return category
+}
+
+func CreateTestAccount(name string, balance decimal.Decimal, userID, currencyID uint) *models.Account {
+	account, err := repository.CreateAccount(
+		userID,
+		name,
+		balance,
+		currencyID,
+	)
+	if err != nil {
+		panic("could not create account")
+	}
+	return account
 }

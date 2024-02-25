@@ -9,7 +9,6 @@ import (
 	"main/db_connector"
 	"main/forms"
 	"main/models"
-	"main/repository"
 	"main/routes"
 	"main/test_utils"
 )
@@ -68,10 +67,7 @@ func (suite *AccountRoutesSuit) TestHandleCreateAccount() {
 }
 
 func (suite *AccountRoutesSuit) TestHandleGetAccount() {
-	account, err := repository.CreateAccount(suite.user.ID, accountName, accountBalance, suite.currency.ID)
-	if err != nil {
-		suite.Error(err)
-	}
+	account := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
 
 	resp := PerformTestRequest(
 		suite.router,
@@ -96,15 +92,8 @@ func (suite *AccountRoutesSuit) TestHandleGetAccount() {
 }
 
 func (suite *AccountRoutesSuit) TestHandleGetAllAccounts() {
-	first, err := repository.CreateAccount(suite.user.ID, accountName, accountBalance, suite.currency.ID)
-	if err != nil {
-		suite.Error(err)
-	}
-
-	second, err := repository.CreateAccount(suite.user.ID, "Another account", decimal.New(20, 10), suite.currency.ID)
-	if err != nil {
-		suite.Error(err)
-	}
+	first := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
+	second := CreateTestAccount("Another account", decimal.New(20, 10), suite.user.ID, suite.currency.ID)
 
 	resp := PerformTestRequest(
 		suite.router,
@@ -142,11 +131,7 @@ func (suite *AccountRoutesSuit) TestHandlePatchAccount() {
 		newCurrency = suite.currency
 	)
 
-	account, err := repository.CreateAccount(suite.user.ID, accountName, accountBalance, suite.currency.ID)
-	if err != nil {
-		suite.Error(err)
-	}
-
+	account := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
 	patchedAccount := forms.AccountForm{
 		Name:       newName,
 		Balance:    newBalance,
@@ -182,10 +167,7 @@ func (suite *AccountRoutesSuit) TestHandlePatchAccount() {
 }
 
 func (suite *AccountRoutesSuit) TestHandleDeleteAccount() {
-	account, err := repository.CreateAccount(suite.user.ID, accountName, accountBalance, suite.currency.ID)
-	if err != nil {
-		suite.Error(err)
-	}
+	account := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
 
 	resp := PerformTestRequest(
 		suite.router,

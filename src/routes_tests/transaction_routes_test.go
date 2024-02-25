@@ -22,6 +22,7 @@ type TransactionRoutesSuit struct {
 	user        *models.User
 	currency    *models.Currency
 	category    *models.Category
+	account     *models.Account
 	authHeaders map[string]string
 }
 
@@ -32,6 +33,7 @@ func (suite *TransactionRoutesSuit) SetupTest() {
 	suite.user = CreateTestUser(userEmail, userPassword)
 	suite.currency = CreateTestCurrency(currencyName)
 	suite.category = CreateTestCategory(categoryName, categoryType, suite.user.ID)
+	suite.account = CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
 	suite.authHeaders = GetAuthHeaders(suite.user)
 
 	suite.router = gin.Default()
@@ -48,6 +50,7 @@ func getTransactionForm(suite *TransactionRoutesSuit) []byte {
 		Amount:      transactionAmount,
 		Date:        transactionDate,
 		CategoryID:  suite.category.ID,
+		AccountID:   suite.account.ID,
 	}
 	stringForm, _ := json.Marshal(&form)
 	return stringForm
@@ -78,6 +81,7 @@ func (suite *TransactionRoutesSuit) TestHandleGetTransaction() {
 		transactionDate,
 		suite.user.ID,
 		suite.category.ID,
+		suite.account.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -112,6 +116,7 @@ func (suite *TransactionRoutesSuit) TestHandleGetAllTransactions() {
 		transactionDate,
 		suite.user.ID,
 		suite.category.ID,
+		suite.account.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -123,6 +128,7 @@ func (suite *TransactionRoutesSuit) TestHandleGetAllTransactions() {
 		time.Now(),
 		suite.user.ID,
 		suite.category.ID,
+		suite.account.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -170,6 +176,7 @@ func (suite *TransactionRoutesSuit) TestHandlePatchTransaction() {
 		transactionDate,
 		suite.user.ID,
 		suite.category.ID,
+		suite.account.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -217,6 +224,7 @@ func (suite *TransactionRoutesSuit) TestHandleDeleteTransaction() {
 		transactionDate,
 		suite.user.ID,
 		suite.category.ID,
+		suite.account.ID,
 	)
 	if err != nil {
 		suite.Error(err)

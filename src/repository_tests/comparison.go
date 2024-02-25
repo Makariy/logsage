@@ -39,4 +39,5 @@ func testTransactionsEqual(expected, actual *models.Transaction, suite *suite.Su
 
 	testUsersEqual(&expected.User, &actual.User, suite)
 	testCategoriesEqual(&expected.Category, &actual.Category, suite)
+	testAccountsEqual(&expected.Account, &actual.Account, suite)
 }
