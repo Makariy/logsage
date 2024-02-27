@@ -124,7 +124,7 @@ func (suite *TransactionRoutesSuit) TestHandleGetAllTransactions() {
 
 	second, err := repository.CreateTransaction(
 		"New description",
-		decimal.New(21, 10),
+		decimal.NewFromInt(21),
 		time.Now(),
 		suite.user.ID,
 		suite.category.ID,
@@ -166,7 +166,7 @@ func (suite *TransactionRoutesSuit) TestHandleGetAllTransactions() {
 func (suite *TransactionRoutesSuit) TestHandlePatchTransaction() {
 	var (
 		newDescription = "New transaction description"
-		newAmount      = decimal.New(20, 10)
+		newAmount      = decimal.NewFromInt(20)
 		newDate        = time.Now()
 	)
 

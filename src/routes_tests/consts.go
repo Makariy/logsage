@@ -12,7 +12,7 @@ var (
 	userPassword = "testpassword"
 
 	accountName    = "KuCoin"
-	accountBalance = decimal.New(1000, 10)
+	accountBalance = decimal.NewFromInt(1000)
 
 	currencyName = "USDT"
 
@@ -20,7 +20,7 @@ var (
 	categoryType = models.SPENDING
 
 	transactionDescription = "Test transaction"
-	transactionAmount      = decimal.New(200, 10)
+	transactionAmount      = decimal.NewFromInt(200)
 	transactionDate        = time.Now()
 )
 

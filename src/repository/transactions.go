@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/shopspring/decimal"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"main/db_connector"
 	"main/models"
@@ -95,13 +96,50 @@ func DeleteTransaction(id uint) (*models.Transaction, error) {
 	return loadAccountToTransaction(result)
 }
 
-func GetTransactionsByDate(fromDate, toDate time.Time) ([]models.Transaction, error) {
+func getTransactionsBaseQuery(db *gorm.DB, fromDate, toDate time.Time) *gorm.DB {
+	return db.Model(models.Transaction{}).
+		Where("? <= date", fromDate).
+		Where("date <= ?", toDate).
+		Preload(clause.Associations).
+		Preload("Account." + clause.Associations).
+		Preload("Category." + clause.Associations)
+}
+
+//func GetTransactionsByDate(fromDate, toDate time.Time) ([]*models.Transaction, error) {
+//	db := db_connector.GetConnection()
+//
+//	var transactions []*models.Transaction
+//	tx := getTransactionsBaseQuery(db, fromDate, toDate).
+//		Find(&transactions)
+//
+//	if tx.Error != nil {
+//		return nil, tx.Error
+//	}
+//	return transactions, nil
+//}
+
+func GetCategoryTransactionsByDate(categoryID uint, fromDate, toDate time.Time) ([]*models.Transaction, error) {
 	db := db_connector.GetConnection()
 
-	var transactions []models.Transaction
-	tx := db.Model(models.Transaction{}).
-		Where("? <= date <= ?", fromDate, toDate).
-		Select(&transactions)
+	var transactions []*models.Transaction
+	tx := getTransactionsBaseQuery(db, fromDate, toDate).
+		Where("category_id = ?", categoryID).
+		Find(&transactions)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return transactions, nil
+}
+
+func GetAccountTransactionByDate(accountID uint, fromDate, toDate time.Time) ([]*models.Transaction, error) {
+	db := db_connector.GetConnection()
+
+	var transactions []*models.Transaction
+	tx := getTransactionsBaseQuery(db, fromDate, toDate).
+		Where("account_id = ?", accountID).
+		Find(&transactions)
+
 	if tx.Error != nil {
 		return nil, tx.Error
 	}

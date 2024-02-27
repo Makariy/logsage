@@ -46,7 +46,7 @@ func (suite *AccountRepositorySuit) TestCreateAccount() {
 func (suite *AccountRepositorySuit) TestPatchAccount() {
 	var (
 		newAccountName = "New test account name"
-		newBalance     = decimal.New(2000, 10)
+		newBalance     = decimal.NewFromInt(2000)
 	)
 	account := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
 	patched, err := repository.PatchAccount(account.ID, newAccountName, newBalance, account.CurrencyID, suite.user.ID)
@@ -76,7 +76,7 @@ func (suite *AccountRepositorySuit) TestGetAccountByID() {
 }
 
 func (suite *AccountRepositorySuit) TestGetUserAccounts() {
-	secondBalance := decimal.New(200, 10)
+	secondBalance := decimal.NewFromInt(200)
 
 	first := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
 	second, err := repository.CreateAccount(

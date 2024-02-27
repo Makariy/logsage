@@ -105,7 +105,7 @@ func (suite *TransactionRepositorySuit) TestGetAllTransactions() {
 	}
 	second, err := repository.CreateTransaction(
 		"Other transaction",
-		decimal.New(500, 10),
+		decimal.NewFromInt(500),
 		time.Now(),
 		suite.user.ID,
 		suite.category.ID,
@@ -150,7 +150,7 @@ func (suite *TransactionRepositorySuit) TestPatchTransaction() {
 
 	var (
 		newDescription = "New transaction description"
-		newAmount      = decimal.New(600, 10)
+		newAmount      = decimal.NewFromInt(600)
 		newDate        = time.Now()
 	)
 

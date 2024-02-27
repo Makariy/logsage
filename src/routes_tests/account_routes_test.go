@@ -93,7 +93,7 @@ func (suite *AccountRoutesSuit) TestHandleGetAccount() {
 
 func (suite *AccountRoutesSuit) TestHandleGetAllAccounts() {
 	first := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
-	second := CreateTestAccount("Another account", decimal.New(20, 10), suite.user.ID, suite.currency.ID)
+	second := CreateTestAccount("Another account", decimal.NewFromInt(20), suite.user.ID, suite.currency.ID)
 
 	resp := PerformTestRequest(
 		suite.router,
@@ -127,7 +127,7 @@ func (suite *AccountRoutesSuit) TestHandleGetAllAccounts() {
 func (suite *AccountRoutesSuit) TestHandlePatchAccount() {
 	var (
 		newName     = "New account name"
-		newBalance  = decimal.New(20, 10)
+		newBalance  = decimal.NewFromInt(20)
 		newCurrency = suite.currency
 	)
 

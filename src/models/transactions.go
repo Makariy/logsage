@@ -8,7 +8,7 @@ import (
 type Transaction struct {
 	ID          uint            `gorm:"column:id;primaryKey;unique;autoIncrement"`
 	Description string          `gorm:"column:description"`
-	Amount      decimal.Decimal `gorm:"column:amount"`
+	Amount      decimal.Decimal `gorm:"column:amount;type:numeric"`
 	Date        time.Time       `gorm:"column:date"`
 	UserID      uint            `gorm:"column:user_id"`
 	User        User            `gorm:"foreignKey:UserID"`
