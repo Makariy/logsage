@@ -13,12 +13,12 @@ var (
 	currencyName = "USDT"
 
 	accountName    = "KuCoin"
-	accountBalance = decimal.New(1000, 10)
+	accountBalance = decimal.NewFromInt(1000)
 
 	categoryName = "Products"
 	categoryType = models.SPENDING
 
 	transactionDescription = "Test transaction description"
 	transactionDate        = time.Now()
-	transactionAmount      = decimal.New(100, 10)
+	transactionAmount      = decimal.NewFromInt(100)
 )
