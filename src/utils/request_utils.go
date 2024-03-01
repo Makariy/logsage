@@ -33,11 +33,11 @@ func GetFromContext[T any](ctx *gin.Context, key string) (*T, bool) {
 	if !exists {
 		return nil, exists
 	}
-	result, ok := value.(T)
+	result, ok := value.(*T)
 	if !ok {
 		return nil, false
 	}
-	return &result, true
+	return result, true
 }
 
 func ShouldGetForm[T any](ctx *gin.Context) (*T, error) {
@@ -54,6 +54,9 @@ func ShouldGetForm[T any](ctx *gin.Context) (*T, error) {
 
 func ShouldParseID(ctx *gin.Context) (uint, error) {
 	strID := ctx.Param("id")
+	if strID == "" {
+		strID = ctx.Query("id")
+	}
 	id, err := strconv.Atoi(strID)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, forms.ErrorResponse{

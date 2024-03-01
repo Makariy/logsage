@@ -42,7 +42,7 @@ func modelPermissionRequired[Model models.UserProtected](ctx *gin.Context) {
 	}
 
 	ctx.Set("item", model)
-	ctx.Set("itemID", modelID)
+	ctx.Set("itemID", &modelID)
 
 	ctx.Next()
 }
@@ -149,13 +149,13 @@ func handlePatchModel[Model models.UserProtected, Form any, ResponseForm any](ct
 }
 
 func handleGetUserModel[Model any, ResponseForm any](ctx *gin.Context) {
-	item, exists := utils.GetFromContext[*Model](ctx, "item")
+	item, exists := utils.GetFromContext[Model](ctx, "item")
 	if !exists {
 		ctx.AbortWithStatus(500)
 		return
 	}
 
-	response, err := renderResponse[Model, ResponseForm](*item, true)
+	response, err := renderResponse[Model, ResponseForm](item, true)
 	if err != nil {
 		ctx.AbortWithStatus(500)
 		return

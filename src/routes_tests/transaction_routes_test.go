@@ -12,6 +12,7 @@ import (
 	"main/repository"
 	"main/routes"
 	"main/test_utils"
+	"main/utils"
 	"time"
 )
 
@@ -71,7 +72,7 @@ func (suite *TransactionRoutesSuit) TestHandleCreateTransaction() {
 		suite.Error(err, "Пиздец")
 	}
 
-	testTransactionsEqual(&transactionResponse, response, &suite.Suite)
+	TestTransactionsEqual(&transactionResponse, response, &suite.Suite)
 }
 
 func (suite *TransactionRoutesSuit) TestHandleGetTransaction() {
@@ -101,12 +102,12 @@ func (suite *TransactionRoutesSuit) TestHandleGetTransaction() {
 		suite.Error(err)
 	}
 
-	expected, err := MarshalModelToForm[models.Transaction, forms.TransactionResponse](transaction)
+	expected, err := utils.MarshalModelToForm[models.Transaction, forms.TransactionResponse](transaction)
 	if err != nil {
 		suite.Error(err)
 	}
 
-	testTransactionsEqual(expected, response, &suite.Suite)
+	TestTransactionsEqual(expected, response, &suite.Suite)
 }
 
 func (suite *TransactionRoutesSuit) TestHandleGetAllTransactions() {
@@ -150,17 +151,17 @@ func (suite *TransactionRoutesSuit) TestHandleGetAllTransactions() {
 
 	suite.Equal(2, len(response.Transactions))
 
-	firstForm, err := MarshalModelToForm[models.Transaction, forms.TransactionResponse](first)
+	firstForm, err := utils.MarshalModelToForm[models.Transaction, forms.TransactionResponse](first)
 	if err != nil {
 		suite.Error(err)
 	}
-	secondForm, err := MarshalModelToForm[models.Transaction, forms.TransactionResponse](second)
+	secondForm, err := utils.MarshalModelToForm[models.Transaction, forms.TransactionResponse](second)
 	if err != nil {
 		suite.Error(err)
 	}
 
-	testTransactionsEqual(firstForm, response.Transactions[0], &suite.Suite)
-	testTransactionsEqual(secondForm, response.Transactions[1], &suite.Suite)
+	TestTransactionsEqual(firstForm, response.Transactions[0], &suite.Suite)
+	TestTransactionsEqual(secondForm, response.Transactions[1], &suite.Suite)
 }
 
 func (suite *TransactionRoutesSuit) TestHandlePatchTransaction() {
@@ -210,11 +211,11 @@ func (suite *TransactionRoutesSuit) TestHandlePatchTransaction() {
 		User:        *suite.user,
 		Category:    *suite.category,
 	}
-	expectedForm, err := MarshalModelToForm[models.Transaction, forms.TransactionResponse](&expectedTransaction)
+	expectedForm, err := utils.MarshalModelToForm[models.Transaction, forms.TransactionResponse](&expectedTransaction)
 	if err != nil {
 		suite.Error(err)
 	}
-	testTransactionsEqual(expectedForm, response, &suite.Suite)
+	TestTransactionsEqual(expectedForm, response, &suite.Suite)
 }
 
 func (suite *TransactionRoutesSuit) TestHandleDeleteTransaction() {
@@ -244,9 +245,9 @@ func (suite *TransactionRoutesSuit) TestHandleDeleteTransaction() {
 		suite.Error(err)
 	}
 
-	expectedForm, err := MarshalModelToForm[models.Transaction, forms.TransactionResponse](transaction)
+	expectedForm, err := utils.MarshalModelToForm[models.Transaction, forms.TransactionResponse](transaction)
 	if err != nil {
 		suite.Error(err)
 	}
-	testTransactionsEqual(expectedForm, response, &suite.Suite)
+	TestTransactionsEqual(expectedForm, response, &suite.Suite)
 }

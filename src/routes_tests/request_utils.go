@@ -3,7 +3,6 @@ package routes_tests
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/copier"
 	"github.com/stretchr/testify/suite"
 	"io"
 	"net/http"
@@ -63,15 +62,6 @@ func UnmarshalResponse[T any](resp *httptest.ResponseRecorder) (*T, error) {
 	}
 
 	err = json.Unmarshal(data, &form)
-	if err != nil {
-		return nil, err
-	}
-	return &form, err
-}
-
-func MarshalModelToForm[Model any, Form any](model *Model) (*Form, error) {
-	var form Form
-	err := copier.Copy(&form, model)
 	if err != nil {
 		return nil, err
 	}

@@ -24,3 +24,7 @@ func TestCurrencyRoutesSuite(t *testing.T) {
 func TestTransactionRoutesSuite(t *testing.T) {
 	suite.Run(t, new(TransactionRoutesSuit))
 }
+
+func TestStatsRoutesSuite(t *testing.T) {
+	suite.Run(t, new(StatsRoutesSuit))
+}

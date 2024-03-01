@@ -9,6 +9,7 @@ import (
 	"main/repository"
 	"main/routes"
 	"main/test_utils"
+	"main/utils"
 )
 
 type CurrencyRoutesSuit struct {
@@ -44,9 +45,9 @@ func (suite *CurrencyRoutesSuit) TestHandleGetAllCurrencies() {
 
 	suite.Equal(1, len(response.Currencies))
 
-	expectedForm, err := MarshalModelToForm[models.Currency, forms.CurrencyResponse](currency)
+	expectedForm, err := utils.MarshalModelToForm[models.Currency, forms.CurrencyResponse](currency)
 	if err != nil {
 		suite.Error(err)
 	}
-	testCurrenciesEqual(expectedForm, response.Currencies[0], &suite.Suite)
+	TestCurrenciesEqual(expectedForm, response.Currencies[0], &suite.Suite)
 }

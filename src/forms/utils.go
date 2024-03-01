@@ -9,7 +9,7 @@ var v = validator.New()
 
 func ValidateForm[T any](ctx *gin.Context) (*T, error) {
 	var form T
-	err := ctx.Bind(&form)
+	err := ctx.BindJSON(&form)
 	if err != nil {
 		return nil, err
 	}
