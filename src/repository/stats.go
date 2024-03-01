@@ -48,10 +48,15 @@ func GetCategoryStats(categoryID uint, fromDate, toDate time.Time) (*models.Cate
 	if err != nil {
 		return nil, err
 	}
+
+	totalPercent := decimal.NewFromInt(0)
+	if !totalAmount.Equal(decimal.NewFromInt(0)) {
+		totalPercent = totalCategoryAmount.Div(totalAmount)
+	}
 	stats := models.CategoryStats{
 		Category:     *category,
 		TotalAmount:  totalCategoryAmount,
-		TotalPercent: totalCategoryAmount.Div(totalAmount),
+		TotalPercent: totalPercent,
 		Transactions: transactions,
 	}
 	return &stats, nil

@@ -38,7 +38,7 @@ func (suite *CategoryRepositorySuit) TestCreateCategory() {
 		Type: categoryType,
 		User: *suite.user,
 	}
-	testCategoriesEqual(&expected, category, &suite.Suite)
+	TestCategoriesEqual(&expected, category, &suite.Suite)
 }
 
 func (suite *CategoryRepositorySuit) TestGetCategoryByID() {
@@ -52,7 +52,7 @@ func (suite *CategoryRepositorySuit) TestGetCategoryByID() {
 		suite.Error(err)
 	}
 
-	testCategoriesEqual(category, result, &suite.Suite)
+	TestCategoriesEqual(category, result, &suite.Suite)
 }
 
 func (suite *CategoryRepositorySuit) TestGetAllCategories() {
@@ -72,16 +72,16 @@ func (suite *CategoryRepositorySuit) TestGetAllCategories() {
 	suite.Equal(2, len(categories))
 
 	for _, category := range categories {
-		testUsersEqual(suite.user, &category.User, &suite.Suite)
+		TestUsersEqual(suite.user, &category.User, &suite.Suite)
 	}
 
 	isFirstFirst := categories[0].ID == first.ID
 	if isFirstFirst {
-		testCategoriesEqual(first, categories[0], &suite.Suite)
-		testCategoriesEqual(second, categories[1], &suite.Suite)
+		TestCategoriesEqual(first, categories[0], &suite.Suite)
+		TestCategoriesEqual(second, categories[1], &suite.Suite)
 	} else {
-		testCategoriesEqual(first, categories[1], &suite.Suite)
-		testCategoriesEqual(second, categories[0], &suite.Suite)
+		TestCategoriesEqual(first, categories[1], &suite.Suite)
+		TestCategoriesEqual(second, categories[0], &suite.Suite)
 	}
 }
 
@@ -108,7 +108,7 @@ func (suite *CategoryRepositorySuit) TestPatchCategory() {
 		User: category.User,
 	}
 
-	testCategoriesEqual(&expected, patched, &suite.Suite)
+	TestCategoriesEqual(&expected, patched, &suite.Suite)
 }
 
 func (suite *CategoryRepositorySuit) TestDeleteCategory() {
@@ -121,7 +121,7 @@ func (suite *CategoryRepositorySuit) TestDeleteCategory() {
 	if err != nil {
 		suite.Error(err)
 	}
-	testCategoriesEqual(category, result, &suite.Suite)
+	TestCategoriesEqual(category, result, &suite.Suite)
 
 	categories, err := repository.GetUserCategories(category.User.ID)
 	if err != nil {

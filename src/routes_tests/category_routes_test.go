@@ -11,6 +11,7 @@ import (
 	"main/repository"
 	"main/routes"
 	"main/test_utils"
+	"main/utils"
 )
 
 type CategoryRoutesSuit struct {
@@ -60,7 +61,7 @@ func (suite *CategoryRoutesSuit) TestHandleCreateCategory() {
 		suite.Error(err)
 	}
 
-	testCategoriesEqual(&categoryResponse, response, &suite.Suite)
+	TestCategoriesEqual(&categoryResponse, response, &suite.Suite)
 }
 
 func (suite *CategoryRoutesSuit) TestHandleGetCategory() {
@@ -83,12 +84,12 @@ func (suite *CategoryRoutesSuit) TestHandleGetCategory() {
 		suite.Error(err)
 	}
 
-	expected, err := MarshalModelToForm[models.Category, forms.CategoryResponse](category)
+	expected, err := utils.MarshalModelToForm[models.Category, forms.CategoryResponse](category)
 	if err != nil {
 		suite.Error(err)
 	}
 
-	testCategoriesEqual(expected, response, &suite.Suite)
+	TestCategoriesEqual(expected, response, &suite.Suite)
 }
 
 func (suite *CategoryRoutesSuit) TestHandleGetAllCategories() {
@@ -118,17 +119,17 @@ func (suite *CategoryRoutesSuit) TestHandleGetAllCategories() {
 
 	suite.Equal(2, len(response.Categories))
 
-	firstForm, err := MarshalModelToForm[models.Category, forms.CategoryResponse](first)
+	firstForm, err := utils.MarshalModelToForm[models.Category, forms.CategoryResponse](first)
 	if err != nil {
 		suite.Error(err)
 	}
-	secondForm, err := MarshalModelToForm[models.Category, forms.CategoryResponse](second)
+	secondForm, err := utils.MarshalModelToForm[models.Category, forms.CategoryResponse](second)
 	if err != nil {
 		suite.Error(err)
 	}
 
-	testCategoriesEqual(firstForm, response.Categories[0], &suite.Suite)
-	testCategoriesEqual(secondForm, response.Categories[1], &suite.Suite)
+	TestCategoriesEqual(firstForm, response.Categories[0], &suite.Suite)
+	TestCategoriesEqual(secondForm, response.Categories[1], &suite.Suite)
 }
 
 func (suite *CategoryRoutesSuit) TestHandlePatchCategory() {
@@ -167,11 +168,11 @@ func (suite *CategoryRoutesSuit) TestHandlePatchCategory() {
 		Type: newType,
 		User: *suite.user,
 	}
-	expectedForm, err := MarshalModelToForm[models.Category, forms.CategoryResponse](&expectedCategory)
+	expectedForm, err := utils.MarshalModelToForm[models.Category, forms.CategoryResponse](&expectedCategory)
 	if err != nil {
 		suite.Error(err)
 	}
-	testCategoriesEqual(expectedForm, response, &suite.Suite)
+	TestCategoriesEqual(expectedForm, response, &suite.Suite)
 }
 
 func (suite *CategoryRoutesSuit) TestHandleDeleteCategory() {
@@ -194,9 +195,9 @@ func (suite *CategoryRoutesSuit) TestHandleDeleteCategory() {
 		suite.Error(err)
 	}
 
-	expectedForm, err := MarshalModelToForm[models.Category, forms.CategoryResponse](category)
+	expectedForm, err := utils.MarshalModelToForm[models.Category, forms.CategoryResponse](category)
 	if err != nil {
 		suite.Error(err)
 	}
-	testCategoriesEqual(expectedForm, response, &suite.Suite)
+	TestCategoriesEqual(expectedForm, response, &suite.Suite)
 }

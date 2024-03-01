@@ -106,7 +106,7 @@ func (suite *StatsRepositorySuit) TestGetCategoryStats() {
 		},
 	}
 
-	testCategoriesStatsEqual(&expected, categoryStats, &suite.Suite)
+	TestCategoriesStatsEqual(&expected, categoryStats, &suite.Suite)
 }
 
 func (suite *StatsRepositorySuit) TestGetAccountStats() {
@@ -129,7 +129,7 @@ func (suite *StatsRepositorySuit) TestGetAccountStats() {
 		},
 	}
 
-	testAccountStatsEqual(&expected, accountStats, &suite.Suite)
+	TestAccountStatsEqual(&expected, accountStats, &suite.Suite)
 }
 
 func (suite *StatsRepositorySuit) TestGetTotalStats() {
@@ -192,5 +192,5 @@ func (suite *StatsRepositorySuit) TestGetTotalStats() {
 		},
 	}
 
-	testTotalStatsEqual(&expected, totalStats, &suite.Suite)
+	TestTotalStatsEqual(&expected, totalStats, &suite.Suite)
 }

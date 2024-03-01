@@ -11,6 +11,7 @@ import (
 	"main/models"
 	"main/routes"
 	"main/test_utils"
+	"main/utils"
 )
 
 type AccountRoutesSuit struct {
@@ -63,7 +64,7 @@ func (suite *AccountRoutesSuit) TestHandleCreateAccount() {
 		suite.Error(err)
 	}
 
-	testAccountsEqual(&accountResponse, response, &suite.Suite)
+	TestAccountsEqual(&accountResponse, response, &suite.Suite)
 }
 
 func (suite *AccountRoutesSuit) TestHandleGetAccount() {
@@ -83,12 +84,12 @@ func (suite *AccountRoutesSuit) TestHandleGetAccount() {
 		suite.Error(err)
 	}
 
-	expected, err := MarshalModelToForm[models.Account, forms.AccountResponse](account)
+	expected, err := utils.MarshalModelToForm[models.Account, forms.AccountResponse](account)
 	if err != nil {
 		suite.Error(err)
 	}
 
-	testAccountsEqual(expected, response, &suite.Suite)
+	TestAccountsEqual(expected, response, &suite.Suite)
 }
 
 func (suite *AccountRoutesSuit) TestHandleGetAllAccounts() {
@@ -111,17 +112,17 @@ func (suite *AccountRoutesSuit) TestHandleGetAllAccounts() {
 
 	suite.Equal(2, len(response.Accounts))
 
-	firstForm, err := MarshalModelToForm[models.Account, forms.AccountResponse](first)
+	firstForm, err := utils.MarshalModelToForm[models.Account, forms.AccountResponse](first)
 	if err != nil {
 		suite.Error(err)
 	}
-	secondForm, err := MarshalModelToForm[models.Account, forms.AccountResponse](second)
+	secondForm, err := utils.MarshalModelToForm[models.Account, forms.AccountResponse](second)
 	if err != nil {
 		suite.Error(err)
 	}
 
-	testAccountsEqual(firstForm, response.Accounts[0], &suite.Suite)
-	testAccountsEqual(secondForm, response.Accounts[1], &suite.Suite)
+	TestAccountsEqual(firstForm, response.Accounts[0], &suite.Suite)
+	TestAccountsEqual(secondForm, response.Accounts[1], &suite.Suite)
 }
 
 func (suite *AccountRoutesSuit) TestHandlePatchAccount() {
@@ -159,11 +160,11 @@ func (suite *AccountRoutesSuit) TestHandlePatchAccount() {
 		Currency: *newCurrency,
 		User:     *suite.user,
 	}
-	expectedForm, err := MarshalModelToForm[models.Account, forms.AccountResponse](&expectedAccount)
+	expectedForm, err := utils.MarshalModelToForm[models.Account, forms.AccountResponse](&expectedAccount)
 	if err != nil {
 		suite.Error(err)
 	}
-	testAccountsEqual(expectedForm, response, &suite.Suite)
+	TestAccountsEqual(expectedForm, response, &suite.Suite)
 }
 
 func (suite *AccountRoutesSuit) TestHandleDeleteAccount() {
@@ -183,9 +184,9 @@ func (suite *AccountRoutesSuit) TestHandleDeleteAccount() {
 		suite.Error(err)
 	}
 
-	expectedForm, err := MarshalModelToForm[models.Account, forms.AccountResponse](account)
+	expectedForm, err := utils.MarshalModelToForm[models.Account, forms.AccountResponse](account)
 	if err != nil {
 		suite.Error(err)
 	}
-	testAccountsEqual(expectedForm, response, &suite.Suite)
+	TestAccountsEqual(expectedForm, response, &suite.Suite)
 }

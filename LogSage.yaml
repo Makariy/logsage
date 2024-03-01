@@ -54,6 +54,8 @@ components:
     currency:
       type: object
       properties:
+        id:
+          type: integer
         name:
           type: string
         type:
@@ -73,6 +75,8 @@ components:
     account:
       type: object
       properties:
+        id:
+          type: integer
         name:
           type: string
         currency:
@@ -96,6 +100,8 @@ components:
     category:
       type: object
       properties:
+        id:
+          type: integer
         name:
           type: string
         type:
@@ -112,6 +118,8 @@ components:
     transaction:
       type: object
       properties:
+        id:
+          type: integer
         account:
           $ref: "#/components/schemas/account"
         date:

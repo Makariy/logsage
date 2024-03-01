@@ -40,7 +40,7 @@ func (suite *AccountRepositorySuit) TestCreateAccount() {
 		User:     *suite.user,
 	}
 
-	testAccountsEqual(&expected, account, &suite.Suite)
+	TestAccountsEqual(&expected, account, &suite.Suite)
 }
 
 func (suite *AccountRepositorySuit) TestPatchAccount() {
@@ -61,7 +61,7 @@ func (suite *AccountRepositorySuit) TestPatchAccount() {
 		Currency: *suite.currency,
 		User:     *suite.user,
 	}
-	testAccountsEqual(&expected, patched, &suite.Suite)
+	TestAccountsEqual(&expected, patched, &suite.Suite)
 }
 
 func (suite *AccountRepositorySuit) TestGetAccountByID() {
@@ -72,7 +72,7 @@ func (suite *AccountRepositorySuit) TestGetAccountByID() {
 		suite.Error(err)
 	}
 
-	testAccountsEqual(account, foundAccount, &suite.Suite)
+	TestAccountsEqual(account, foundAccount, &suite.Suite)
 }
 
 func (suite *AccountRepositorySuit) TestGetUserAccounts() {
@@ -97,16 +97,16 @@ func (suite *AccountRepositorySuit) TestGetUserAccounts() {
 	suite.Equal(len(accounts), 2)
 
 	for _, account := range accounts {
-		testUsersEqual(suite.user, &account.User, &suite.Suite)
+		TestUsersEqual(suite.user, &account.User, &suite.Suite)
 	}
 
 	isFirstFirst := accounts[0].ID == first.ID
 	if isFirstFirst {
-		testAccountsEqual(first, accounts[0], &suite.Suite)
-		testAccountsEqual(second, accounts[1], &suite.Suite)
+		TestAccountsEqual(first, accounts[0], &suite.Suite)
+		TestAccountsEqual(second, accounts[1], &suite.Suite)
 	} else {
-		testAccountsEqual(first, accounts[1], &suite.Suite)
-		testAccountsEqual(second, accounts[0], &suite.Suite)
+		TestAccountsEqual(first, accounts[1], &suite.Suite)
+		TestAccountsEqual(second, accounts[0], &suite.Suite)
 	}
 }
 
@@ -117,7 +117,7 @@ func (suite *AccountRepositorySuit) TestDeleteAccount() {
 	if err != nil {
 		suite.Error(err)
 	}
-	testAccountsEqual(account, result, &suite.Suite)
+	TestAccountsEqual(account, result, &suite.Suite)
 
 	accounts, err := repository.GetUserAccounts(account.User.ID)
 	if err != nil {
