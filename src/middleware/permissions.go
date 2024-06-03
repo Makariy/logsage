@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func UserModelPermission[Model models.UserProtected](ctx *gin.Context) {
+func UserModelPermission[Model models.UserGettable](ctx *gin.Context) {
 	user, exists := GetFromContext[*models.User](ctx, UserKey)
 	if !exists {
 		ctx.Abort()
@@ -29,7 +29,7 @@ func UserModelPermission[Model models.UserProtected](ctx *gin.Context) {
 	}
 }
 
-func AttachUserAndModel[Model models.UserProtected]() gin.HandlerFunc {
+func AttachUserAndModel[Model models.UserGettable]() gin.HandlerFunc {
 	return GroupMiddlewares([]gin.HandlerFunc{
 		AttachUser,
 		AttachModelID,

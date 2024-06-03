@@ -35,7 +35,7 @@ func AttachModelID(ctx *gin.Context) {
 	ctx.Set(ModelIdKey, &modelID)
 }
 
-func AttachModel[Model models.UserProtected](ctx *gin.Context) {
+func AttachModel[Model models.UserGettable](ctx *gin.Context) {
 	modelID, exists := GetFromContext[*models.ModelID](ctx, ModelIdKey)
 	if !exists {
 		ctx.Abort()

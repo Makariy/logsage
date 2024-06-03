@@ -5,8 +5,11 @@ import (
 	"errors"
 )
 
-type UserProtected interface {
+type UserGettable interface {
 	GetUser() *User
+}
+
+type UserSettable interface {
 	SetUser(*User)
 }
 

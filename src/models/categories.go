@@ -20,6 +20,6 @@ func (Category) TableName() string {
 func (category Category) GetUser() *User {
 	return &category.User
 }
-func (category Category) SetUser(user *User) {
+func (category *Category) SetUser(user *User) {
 	category.UserID = user.ID
 }

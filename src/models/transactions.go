@@ -25,6 +25,7 @@ func (Transaction) TableName() string {
 func (transaction Transaction) GetUser() *User {
 	return &transaction.User
 }
-func (transaction Transaction) SetUser(user *User) {
+
+func (transaction *Transaction) SetUser(user *User) {
 	transaction.UserID = user.ID
 }

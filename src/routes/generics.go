@@ -47,7 +47,17 @@ func renderResponses[Model any, ItemForm any, ItemsForm forms.ListResponse](item
 	return form, nil
 }
 
-func handleCreateUserModel[Model models.UserProtected, Form any, ResponseForm any](
+func setUser[Model any](model *Model, user *models.User) (ok bool) {
+	var other interface{} = model
+	settable, ok := other.(models.UserSettable)
+	if !ok {
+		return ok
+	}
+	settable.SetUser(user)
+	return true
+}
+
+func handleCreateUserModel[Model models.UserGettable, Form any, ResponseForm any](
 	parseForm func(*gin.Context) (*Form, error),
 	createModel func(*Model) (*Model, error),
 ) func(*gin.Context) {
@@ -69,7 +79,12 @@ func handleCreateUserModel[Model models.UserProtected, Form any, ResponseForm an
 			ctx.AbortWithStatus(500)
 			return
 		}
-		utils.SetField(&model, "UserID", user.ID)
+
+		ok := setUser[Model](&model, user)
+		if !ok {
+			ctx.AbortWithStatus(500)
+			return
+		}
 
 		result, err := createModel(&model)
 		if err != nil {
@@ -85,7 +100,7 @@ func handleCreateUserModel[Model models.UserProtected, Form any, ResponseForm an
 	}
 }
 
-func handlePatchModel[Model models.UserProtected, Form any, ResponseForm any](
+func handlePatchModel[Model models.UserGettable, Form any, ResponseForm any](
 	parseForm func(*gin.Context) (*Form, error),
 	patchModel func(*Model) (*Model, error),
 ) func(*gin.Context) {

@@ -20,6 +20,6 @@ func (account Account) GetUser() *User {
 	return &account.User
 }
 
-func (account Account) SetUser(user *User) {
+func (account *Account) SetUser(user *User) {
 	account.UserID = user.ID
 }
