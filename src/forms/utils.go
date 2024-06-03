@@ -20,3 +20,17 @@ func ValidateForm[T any](ctx *gin.Context) (*T, error) {
 	}
 	return &form, nil
 }
+
+func ValidateQuery[T any](ctx *gin.Context) (*T, error) {
+	var form T
+	err := ctx.BindQuery(&form)
+	if err != nil {
+		return nil, err
+	}
+
+	err = v.Struct(&form)
+	if err != nil {
+		return nil, err
+	}
+	return &form, nil
+}

@@ -6,11 +6,11 @@ const (
 )
 
 type Category struct {
-	ID     uint   `gorm:"column:id;primaryKey;unique;autoIncrement"`
-	Name   string `gorm:"column:name;unique"`
-	Type   string `gorm:"column:type"`
-	UserID uint   `gorm:"column:user_id"`
-	User   User   `gorm:"foreignKey:UserID"`
+	ID     ModelID `gorm:"column:id;primaryKey;unique;autoIncrement"`
+	Name   string  `gorm:"column:name;unique"`
+	Type   string  `gorm:"column:type"`
+	UserID ModelID `gorm:"column:user_id"`
+	User   User    `gorm:"foreignKey:UserID"`
 }
 
 func (Category) TableName() string {
@@ -19,4 +19,7 @@ func (Category) TableName() string {
 
 func (category Category) GetUser() *User {
 	return &category.User
+}
+func (category Category) SetUser(user *User) {
+	category.UserID = user.ID
 }

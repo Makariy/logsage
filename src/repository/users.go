@@ -35,6 +35,6 @@ func CreateUser(email, password string) (*models.User, error) {
 	return CreateModel(&user)
 }
 
-func DeleteUser(id uint) (*models.User, error) {
+func DeleteUser(id models.ModelID) (*models.User, error) {
 	return DeleteModel[models.User](id)
 }

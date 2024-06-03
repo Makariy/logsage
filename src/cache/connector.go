@@ -17,6 +17,7 @@ var (
 var conn *redis.Client
 
 func getConnection() *redis.Client {
+	fmt.Println("Connecting to redis: ", RedisHost+":"+RedisPort)
 	ctx, _ := GetContext()
 	client := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", RedisHost, RedisPort),
@@ -35,7 +36,7 @@ func GetConnection() *redis.Client {
 }
 
 func GetContext() (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), time.Second*3)
+	return context.WithTimeout(context.Background(), time.Second*5)
 }
 
 func init() {

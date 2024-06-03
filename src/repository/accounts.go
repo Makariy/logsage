@@ -5,7 +5,7 @@ import (
 	"main/models"
 )
 
-func CreateAccount(userId uint, name string, balance decimal.Decimal, currencyId uint) (*models.Account, error) {
+func CreateAccount(userId models.ModelID, name string, balance decimal.Decimal, currencyId models.ModelID) (*models.Account, error) {
 	account := models.Account{
 		UserID:     userId,
 		Name:       name,
@@ -16,7 +16,7 @@ func CreateAccount(userId uint, name string, balance decimal.Decimal, currencyId
 	return CreateModel(&account)
 }
 
-func PatchAccount(id uint, name string, balance decimal.Decimal, currencyId uint, userID uint) (*models.Account, error) {
+func PatchAccount(id models.ModelID, name string, balance decimal.Decimal, currencyId models.ModelID, userID models.ModelID) (*models.Account, error) {
 	account := models.Account{
 		ID:         id,
 		Name:       name,
@@ -27,14 +27,14 @@ func PatchAccount(id uint, name string, balance decimal.Decimal, currencyId uint
 	return PatchModel(&account)
 }
 
-func GetAccountByID(id uint) (*models.Account, error) {
+func GetAccountByID(id models.ModelID) (*models.Account, error) {
 	return GetModelByID[models.Account](id)
 }
 
-func GetUserAccounts(userId uint) ([]*models.Account, error) {
+func GetUserAccounts(userId models.ModelID) ([]*models.Account, error) {
 	return GetUserModels[models.Account](userId)
 }
 
-func DeleteAccount(id uint) (*models.Account, error) {
+func DeleteAccount(id models.ModelID) (*models.Account, error) {
 	return DeleteModel[models.Account](id)
 }

@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"main/forms"
+	"main/middleware"
 	"main/models"
 	"main/repository"
 	"main/utils"
@@ -11,43 +12,27 @@ import (
 
 func AddStatsRoutes(router *gin.Engine) {
 	group := router.Group("/stats")
-	group.Use(utils.LoginRequired)
+	group.Use(middleware.LoginRequired)
 
-	group.GET("/all/", includeDateRange, handleGetTotalStats)
-	group.GET("/category/:id/", includeDateRange, modelPermissionRequired[models.Category], handleGetCategoryStats)
-	group.GET("/account/:id/", includeDateRange, modelPermissionRequired[models.Account], handleGetAccountStats)
-}
-
-const DateRangeKey = "dateRange"
-
-func includeDateRange(ctx *gin.Context) {
-	dateForm, err := utils.ShouldGetForm[forms.DateRange](ctx)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, forms.ErrorResponse{
-			Status: "Bad request",
-			Error:  "Invalid date",
-		})
-		return
-	}
-	if dateForm.FromDate.Compare(dateForm.ToDate) > 0 {
-		ctx.JSON(http.StatusBadRequest, forms.ErrorResponse{
-			Status: "Bad request",
-			Error:  "Invalid date range",
-		})
-		return
-	}
-
-	ctx.Set(DateRangeKey, dateForm)
+	group.GET("/all/", middleware.AttachDateRange, handleGetTotalStats)
+	group.GET("/category/:id/",
+		middleware.AttachDateRange,
+		middleware.AttachUserAndModel[models.Category](),
+		handleGetCategoryStats)
+	group.GET("/account/:id/",
+		middleware.AttachDateRange,
+		middleware.AttachUserAndModel[models.Account](),
+		handleGetAccountStats)
 }
 
 func handleGetCategoryStats(ctx *gin.Context) {
-	category, exists := utils.GetFromContext[models.Category](ctx, "item")
+	category, exists := middleware.GetFromContext[*models.Category](ctx, middleware.ModelKey)
 	if !exists {
 		ctx.AbortWithStatus(500)
 		return
 	}
 
-	dateRange, exists := utils.GetFromContext[forms.DateRange](ctx, DateRangeKey)
+	dateRange, exists := middleware.GetFromContext[*forms.DateTimeRange](ctx, middleware.DateRangeKey)
 	if !exists {
 		ctx.AbortWithStatus(500)
 		return
@@ -61,6 +46,7 @@ func handleGetCategoryStats(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, forms.CategoryStatsResponse{
 		SuccessResponse: forms.Success,
+		DateRange:       dateRange.ToDateRange(),
 		Category: forms.CategoryResponse{
 			ID:   category.ID,
 			Name: category.Name,
@@ -71,13 +57,13 @@ func handleGetCategoryStats(ctx *gin.Context) {
 }
 
 func handleGetAccountStats(ctx *gin.Context) {
-	account, exists := utils.GetFromContext[models.Account](ctx, "item")
+	account, exists := middleware.GetFromContext[*models.Account](ctx, middleware.ModelKey)
 	if !exists {
 		ctx.AbortWithStatus(500)
 		return
 	}
 
-	dateRange, exists := utils.GetFromContext[forms.DateRange](ctx, DateRangeKey)
+	dateRange, exists := middleware.GetFromContext[*forms.DateTimeRange](ctx, middleware.DateRangeKey)
 	if !exists {
 		ctx.AbortWithStatus(500)
 		return
@@ -97,19 +83,20 @@ func handleGetAccountStats(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, forms.AccountStatsResponse{
 		SuccessResponse: forms.Success,
+		DateRange:       dateRange.ToDateRange(),
 		Account:         *accountForm,
 		Stats:           *stats,
 	})
 }
 
 func handleGetTotalStats(ctx *gin.Context) {
-	user, err := utils.GetUserFromRequest(ctx)
+	user, err := middleware.GetUserFromRequest(ctx)
 	if err != nil {
 		ctx.AbortWithStatus(500)
 		return
 	}
 
-	dateRange, exists := utils.GetFromContext[forms.DateRange](ctx, DateRangeKey)
+	dateRange, exists := middleware.GetFromContext[*forms.DateTimeRange](ctx, middleware.DateRangeKey)
 	if !exists {
 		ctx.AbortWithStatus(500)
 		return
@@ -123,6 +110,7 @@ func handleGetTotalStats(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, forms.TotalStatsResponse{
 		SuccessResponse: forms.Success,
+		DateRange:       dateRange.ToDateRange(),
 		Stats:           *stats,
 	})
 }

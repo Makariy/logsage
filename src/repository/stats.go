@@ -19,7 +19,7 @@ func getStatsQueryJoinCategory(db *gorm.DB, fromDate, toDate time.Time) *gorm.DB
 		Joins("inner join category on category_id = category.id")
 }
 
-func GetCategoryStats(categoryID uint, fromDate, toDate time.Time) (*models.CategoryStats, error) {
+func GetCategoryStats(categoryID models.ModelID, fromDate, toDate time.Time) (*models.CategoryStats, error) {
 	db := db_connector.GetConnection()
 	var (
 		totalCategoryAmount, totalAmount decimal.Decimal
@@ -83,7 +83,7 @@ func getAccountTransactedAmount(
 	db *gorm.DB,
 	fromDate,
 	toDate time.Time,
-	accountID uint,
+	accountID models.ModelID,
 	categoryType string,
 ) (amount decimal.Decimal, err error) {
 	err = getStatsQueryJoinCategoryByType(db, fromDate, toDate, categoryType).
@@ -93,7 +93,7 @@ func getAccountTransactedAmount(
 	return
 }
 
-func GetAccountStats(accountID uint, fromDate, toDate time.Time) (*models.AccountStats, error) {
+func GetAccountStats(accountID models.ModelID, fromDate, toDate time.Time) (*models.AccountStats, error) {
 	db := db_connector.GetConnection()
 
 	account, err := GetAccountByID(accountID)
@@ -119,19 +119,28 @@ func GetAccountStats(accountID uint, fromDate, toDate time.Time) (*models.Accoun
 		return nil, err
 	}
 
+	totalEarnedPercent := decimal.NewFromInt(0)
+	if !totalEarnedAmount.Equal(decimal.NewFromInt(0)) {
+		totalEarnedPercent = accountEarnedAmount.Div(totalEarnedAmount)
+	}
+	totalSpentPercent := decimal.NewFromInt(0)
+	if !totalSpentAmount.Equal(decimal.NewFromInt(0)) {
+		totalSpentPercent = accountSpentAmount.Div(totalSpentAmount)
+	}
+
 	stats := models.AccountStats{
 		Account:            *account,
 		TotalEarnedAmount:  accountEarnedAmount,
-		TotalEarnedPercent: accountEarnedAmount.Div(totalEarnedAmount),
+		TotalEarnedPercent: totalEarnedPercent,
 		TotalSpentAmount:   accountSpentAmount,
-		TotalSpentPercent:  accountSpentAmount.Div(totalSpentAmount),
+		TotalSpentPercent:  totalSpentPercent,
 		Transactions:       transactions,
 	}
 
 	return &stats, nil
 }
 
-func GetAccountsStats(userID uint, fromDate, toDate time.Time) ([]*models.AccountStats, error) {
+func GetAccountsStats(userID models.ModelID, fromDate, toDate time.Time) ([]*models.AccountStats, error) {
 	accounts, err := GetUserAccounts(userID)
 	if err != nil {
 		return nil, err
@@ -148,7 +157,7 @@ func GetAccountsStats(userID uint, fromDate, toDate time.Time) ([]*models.Accoun
 	return accountsStats, nil
 }
 
-func GetCategoriesStats(userID uint, fromDate, toDate time.Time) ([]*models.CategoryStats, error) {
+func GetCategoriesStats(userID models.ModelID, fromDate, toDate time.Time) ([]*models.CategoryStats, error) {
 	categories, err := GetUserCategories(userID)
 	if err != nil {
 		return nil, err
@@ -166,7 +175,7 @@ func GetCategoriesStats(userID uint, fromDate, toDate time.Time) ([]*models.Cate
 	return categoriesStats, nil
 }
 
-func GetTotalStats(userID uint, fromDate, toDate time.Time) (*models.TotalStats, error) {
+func GetTotalStats(userID models.ModelID, fromDate, toDate time.Time) (*models.TotalStats, error) {
 	db := db_connector.GetConnection()
 
 	totalEarnedAmount, err := getTotalTransactedAmount(db, fromDate, toDate, models.EARNING)

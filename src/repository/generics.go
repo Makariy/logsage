@@ -4,6 +4,8 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"main/db_connector"
+	"main/models"
+	"time"
 )
 
 func CreateModel[T any](model *T) (*T, error) {
@@ -43,7 +45,7 @@ func PatchModel[T any](model *T) (*T, error) {
 	return model, nil
 }
 
-func GetModelByID[T any](id uint) (*T, error) {
+func GetModelByID[T any](id models.ModelID) (*T, error) {
 	db := db_connector.GetConnection()
 
 	var model T
@@ -66,7 +68,7 @@ func GetAllModels[T any]() ([]*T, error) {
 	return items, nil
 }
 
-func GetUserModels[T any](userId uint) ([]*T, error) {
+func GetUserModels[T any](userId models.ModelID) ([]*T, error) {
 	db := db_connector.GetConnection()
 
 	var items []*T
@@ -77,7 +79,20 @@ func GetUserModels[T any](userId uint) ([]*T, error) {
 	return items, nil
 }
 
-func DeleteModel[T any](id uint) (*T, error) {
+func GetUserModelsWithDateRange[T any](userID models.ModelID, startDate, endDate time.Time) ([]*T, error) {
+	db := db_connector.GetConnection()
+
+	var items []*T
+	tx := db.
+		Preload(clause.Associations).
+		Find(&items, "user_id = ? AND date >= ? AND date <= ?", userID, startDate, endDate)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return items, nil
+}
+
+func DeleteModel[T any](id models.ModelID) (*T, error) {
 	db := db_connector.GetConnection()
 
 	var model T

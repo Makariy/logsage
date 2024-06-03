@@ -170,9 +170,19 @@ components:
         transactions:
           $ref: "#/components/schemas/transactionsList"
 
+    dateRange:
+      type: object
+      properties:
+        dateFrom:
+          type: number
+        dateTo:
+          type: number
+
     totalStats:
       type: object
       properties:
+        dateRange:
+          $ref: "#/components/schemas/dateRange"
         totalEarnedAmount:
           type: number
         totalSpentAmount:
@@ -185,7 +195,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/categoryStats"
-
 
 
 paths:
@@ -348,7 +357,18 @@ paths:
     post:
       summary: Create a new account
       parameters:
-        - $ref: "#/components/schemas/account"
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: currencyID
+          in: query
+          schema:
+            type: number
+        - name: balance
+          in: query
+          schema:
+            type: number
 
       responses:
         '201':
@@ -501,7 +521,14 @@ paths:
     post:
       summary: Create a new category
       parameters:
-        - $ref: "#/components/schemas/category"
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            $ref: "#/components/schemas/categoryType"
 
       responses:
         '201':
@@ -604,6 +631,19 @@ paths:
   /transaction/all/:
     get:
       summary: Get information about all the user transactions
+      parameters:
+        - name: fromDate
+          in: query
+          description: Date from
+          schema:
+            type: number
+            required: true
+        - name: toDate
+          in: query
+          description: Date to
+          schema:
+            type: number
+            required: true
       responses:
         '200':
           description: Request succeeded
@@ -647,7 +687,27 @@ paths:
     post:
       summary: Create a new transaction
       parameters:
-        - $ref: "#/components/schemas/transaction"
+        - name: accountID
+          in: query
+          schema:
+            type: number
+        - name: date
+          in: query
+          schema:
+            type: number
+        - name: amount
+          in: query
+          schema:
+            type: number
+        - name: categoryID
+          in: query
+          schema:
+            type: number
+        - name: description
+          in: query
+          schema:
+            type: string
+
 
       responses:
         '201':
@@ -851,18 +911,18 @@ paths:
     get:
       description: Get all analytics
       parameters:
-        - name: from
+        - name: fromDate
           in: query
           description: Date from
           schema:
             type: number
-            required: false
-        - name: to
+            required: true
+        - name: toDate
           in: query
           description: Date to
           schema:
             type: number
-            required: false
+            required: true
 
       responses:
         '200':

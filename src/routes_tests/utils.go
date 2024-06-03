@@ -24,7 +24,7 @@ func CreateTestCurrency(currencyName string) *models.Currency {
 	return currency
 }
 
-func CreateTestCategory(name string, categoryType string, userID uint) *models.Category {
+func CreateTestCategory(name string, categoryType string, userID models.ModelID) *models.Category {
 	category, err := repository.CreateCategory(userID, name, categoryType)
 	if err != nil {
 		panic("could not create test category")
@@ -32,7 +32,7 @@ func CreateTestCategory(name string, categoryType string, userID uint) *models.C
 	return category
 }
 
-func CreateTestAccount(name string, balance decimal.Decimal, userID, currencyID uint) *models.Account {
+func CreateTestAccount(name string, balance decimal.Decimal, userID, currencyID models.ModelID) *models.Account {
 	account, err := repository.CreateAccount(
 		userID,
 		name,
@@ -49,9 +49,9 @@ func CreateTestTransaction(
 	description string,
 	amount decimal.Decimal,
 	date time.Time,
-	userID uint,
-	categoryID uint,
-	accountID uint,
+	userID models.ModelID,
+	categoryID models.ModelID,
+	accountID models.ModelID,
 ) *models.Transaction {
 	transaction, err := repository.CreateTransaction(description, amount, date, userID, categoryID, accountID)
 	if err != nil {

@@ -5,7 +5,7 @@ import (
 	"main/models"
 )
 
-func getUserKeyPatternById(id uint) string {
+func getUserKeyPatternById(id models.ModelID) string {
 	return fmt.Sprintf("user_%d_*", id)
 }
 

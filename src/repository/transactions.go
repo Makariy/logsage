@@ -18,7 +18,7 @@ func loadAccountToTransaction(transaction *models.Transaction) (*models.Transact
 	return transaction, nil
 }
 
-func GetTransactionByID(id uint) (*models.Transaction, error) {
+func GetTransactionByID(id models.ModelID) (*models.Transaction, error) {
 	transaction, err := GetModelByID[models.Transaction](id)
 	if err != nil {
 		return nil, err
@@ -26,13 +26,14 @@ func GetTransactionByID(id uint) (*models.Transaction, error) {
 	return loadAccountToTransaction(transaction)
 }
 
-func GetUserTransactions(userID uint) ([]*models.Transaction, error) {
+func GetUserTransactions(userID models.ModelID) ([]*models.Transaction, error) {
 	db := db_connector.GetConnection()
 
 	var transactions []*models.Transaction
 
 	tx := db.Preload(clause.Associations).
 		Preload("Account."+clause.Associations).
+		Preload("Category."+clause.Associations).
 		Find(&transactions, "user_id = ?", userID)
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -44,9 +45,9 @@ func CreateTransaction(
 	description string,
 	amount decimal.Decimal,
 	date time.Time,
-	userID uint,
-	categoryID uint,
-	accountID uint,
+	userID models.ModelID,
+	categoryID models.ModelID,
+	accountID models.ModelID,
 ) (*models.Transaction, error) {
 	transaction := models.Transaction{
 		Description: description,
@@ -64,13 +65,13 @@ func CreateTransaction(
 }
 
 func PatchTransaction(
-	transactionID uint,
+	transactionID models.ModelID,
 	description string,
 	amount decimal.Decimal,
 	date time.Time,
-	userID uint,
-	categoryID uint,
-	accountID uint,
+	userID models.ModelID,
+	categoryID models.ModelID,
+	accountID models.ModelID,
 ) (*models.Transaction, error) {
 	transaction := models.Transaction{
 		ID:          transactionID,
@@ -88,7 +89,7 @@ func PatchTransaction(
 	return loadAccountToTransaction(result)
 }
 
-func DeleteTransaction(id uint) (*models.Transaction, error) {
+func DeleteTransaction(id models.ModelID) (*models.Transaction, error) {
 	result, err := DeleteModel[models.Transaction](id)
 	if err != nil {
 		return nil, err
@@ -118,7 +119,7 @@ func getTransactionsBaseQuery(db *gorm.DB, fromDate, toDate time.Time) *gorm.DB 
 //	return transactions, nil
 //}
 
-func GetCategoryTransactionsByDate(categoryID uint, fromDate, toDate time.Time) ([]*models.Transaction, error) {
+func GetCategoryTransactionsByDate(categoryID models.ModelID, fromDate, toDate time.Time) ([]*models.Transaction, error) {
 	db := db_connector.GetConnection()
 
 	var transactions []*models.Transaction
@@ -132,7 +133,7 @@ func GetCategoryTransactionsByDate(categoryID uint, fromDate, toDate time.Time) 
 	return transactions, nil
 }
 
-func GetAccountTransactionByDate(accountID uint, fromDate, toDate time.Time) ([]*models.Transaction, error) {
+func GetAccountTransactionByDate(accountID models.ModelID, fromDate, toDate time.Time) ([]*models.Transaction, error) {
 	db := db_connector.GetConnection()
 
 	var transactions []*models.Transaction

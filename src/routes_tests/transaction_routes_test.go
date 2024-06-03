@@ -13,6 +13,8 @@ import (
 	"main/routes"
 	"main/test_utils"
 	"main/utils"
+	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -110,6 +112,13 @@ func (suite *TransactionRoutesSuit) TestHandleGetTransaction() {
 	TestTransactionsEqual(expected, response, &suite.Suite)
 }
 
+func getTransactionsDateRange() string {
+	params := url.Values{}
+	params.Add("fromDate", strconv.FormatInt(transactionDate.Unix()-1, 10))
+	params.Add("toDate", strconv.FormatInt(time.Now().Unix()+1, 10))
+	return params.Encode()
+}
+
 func (suite *TransactionRoutesSuit) TestHandleGetAllTransactions() {
 	first, err := repository.CreateTransaction(
 		transactionDescription,
@@ -138,7 +147,7 @@ func (suite *TransactionRoutesSuit) TestHandleGetAllTransactions() {
 	resp := PerformTestRequest(
 		suite.router,
 		"GET",
-		"/transaction/all/",
+		fmt.Sprintf("/transaction/all/?%s", getTransactionsDateRange()),
 		getTransactionForm(suite),
 		&suite.authHeaders,
 	)

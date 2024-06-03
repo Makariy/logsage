@@ -6,7 +6,7 @@ import (
 	"main/models"
 )
 
-func getUserKeyById(id uint) ([]byte, error) {
+func getUserKeyById(id models.ModelID) ([]byte, error) {
 	pattern := getUserKeyPatternById(id)
 	return cache.GetKeyByPattern(pattern)
 }
@@ -52,7 +52,7 @@ func delUserByKey(key string) error {
 	return conn.Del(ctx, key).Err()
 }
 
-func GetUserByID(id uint) (*models.User, error) {
+func GetUserByID(id models.ModelID) (*models.User, error) {
 	key, err := getUserKeyById(id)
 	if err != nil {
 		return nil, err

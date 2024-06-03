@@ -15,6 +15,7 @@ func main() {
 	routes.AddCurrencyRoutes(router)
 	routes.AddCategoryRoutes(router)
 	routes.AddStatsRoutes(router)
+	routes.AddTransactionRoutes(router)
 
 	err := router.Run("localhost:8000")
 	if err != nil {

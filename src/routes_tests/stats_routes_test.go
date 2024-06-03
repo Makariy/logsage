@@ -1,7 +1,6 @@
 package routes_tests
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
@@ -13,6 +12,8 @@ import (
 	"main/routes"
 	"main/test_utils"
 	"main/utils"
+	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -54,10 +55,11 @@ var (
 )
 
 var (
-	year     = 2024
-	month    = time.January
-	fromDate = time.Date(year, month, 01, 00, 00, 00, 00, time.Local)
-	toDate   = time.Date(year, month, 10, 00, 00, 00, 00, time.Local)
+	year      = 2024
+	month     = time.January
+	fromDate  = time.Date(year, month, 01, 00, 00, 00, 00, time.Local)
+	toDate    = time.Date(year, month, 10, 00, 00, 00, 00, time.Local)
+	dateRange = forms.DateRange{fromDate.Unix(), toDate.Unix()}
 )
 
 func createTestTransactions(suite *StatsRoutesSuit) {
@@ -95,25 +97,19 @@ func createTestTransactions(suite *StatsRoutesSuit) {
 	)
 }
 
-func getDateRange() []byte {
-	form := forms.DateRange{
-		FromDate: fromDate,
-		ToDate:   toDate,
-	}
-
-	data, err := json.Marshal(form)
-	if err != nil {
-		panic("could not marshal DateRange to JSON")
-	}
-	return data
+func getDateRange() string {
+	params := url.Values{}
+	params.Add("fromDate", strconv.FormatInt(fromDate.Unix(), 10))
+	params.Add("toDate", strconv.FormatInt(toDate.Unix(), 10))
+	return params.Encode()
 }
 
 func (suite *StatsRoutesSuit) TestHandleGetCategoryStats() {
 	resp := PerformTestRequest(
 		suite.router,
 		"GET",
-		fmt.Sprintf("/stats/category/%d/", suite.category.ID),
-		getDateRange(),
+		fmt.Sprintf("/stats/category/%d/?%s", suite.category.ID, getDateRange()),
+		nil,
 		&suite.authHeaders,
 	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
@@ -128,7 +124,8 @@ func (suite *StatsRoutesSuit) TestHandleGetCategoryStats() {
 	}
 
 	expected := forms.CategoryStatsResponse{
-		Category: *categoryForm,
+		Category:  *categoryForm,
+		DateRange: &dateRange,
 		Stats: models.CategoryStats{
 			Category:     *suite.category,
 			TotalAmount:  decimal.NewFromInt(600),
@@ -148,8 +145,8 @@ func (suite *StatsRoutesSuit) TestHandleGetAccountStats() {
 	resp := PerformTestRequest(
 		suite.router,
 		"GET",
-		fmt.Sprintf("/stats/account/%d/", suite.account.ID),
-		getDateRange(),
+		fmt.Sprintf("/stats/account/%d/?%s", suite.account.ID, getDateRange()),
+		nil,
 		&suite.authHeaders,
 	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
@@ -163,7 +160,8 @@ func (suite *StatsRoutesSuit) TestHandleGetAccountStats() {
 	}
 
 	expected := forms.AccountStatsResponse{
-		Account: *accountForm,
+		Account:   *accountForm,
+		DateRange: &dateRange,
 		Stats: models.AccountStats{
 			Account:            *suite.account,
 			TotalEarnedAmount:  decimal.NewFromInt(200),
@@ -186,8 +184,8 @@ func (suite *StatsRoutesSuit) TestHandleGetTotalStats() {
 	resp := PerformTestRequest(
 		suite.router,
 		"GET",
-		"/stats/all/",
-		getDateRange(),
+		fmt.Sprintf("/stats/all/?%s", getDateRange()),
+		nil,
 		&suite.authHeaders,
 	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
@@ -196,6 +194,7 @@ func (suite *StatsRoutesSuit) TestHandleGetTotalStats() {
 	suite.True(err == nil)
 
 	expected := forms.TotalStatsResponse{
+		DateRange: &dateRange,
 		Stats: models.TotalStats{
 			TotalEarnedAmount: decimal.NewFromInt(200),
 			TotalSpentAmount:  decimal.NewFromInt(600),

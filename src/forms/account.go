@@ -2,17 +2,18 @@ package forms
 
 import (
 	"github.com/shopspring/decimal"
+	"main/models"
 )
 
 type AccountForm struct {
 	Name       string          `json:"name" form:"name"`
-	CurrencyID uint            `json:"currencyId" form:"currencyId"`
+	CurrencyID models.ModelID  `json:"currencyId" form:"currencyId"`
 	Balance    decimal.Decimal `json:"balance" form:"balance"`
 }
 
 type AccountResponse struct {
 	*SuccessResponse
-	ID       uint              `json:"id"`
+	ID       models.ModelID    `json:"id"`
 	Name     string            `json:"name"`
 	Currency *CurrencyResponse `json:"currency"`
 	Balance  decimal.Decimal   `json:"balance"`

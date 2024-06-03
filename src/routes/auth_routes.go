@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 	"main/auth"
 	"main/forms"
+	"main/middleware"
 	"main/models"
 	"main/utils"
 	"net/http"
@@ -15,8 +16,8 @@ func AddAuthRoutes(router *gin.Engine) {
 	group := router.Group("/auth/")
 	group.POST("/login/", handleLogin)
 	group.POST("/signup/", handleSignUp)
-	group.POST("/logout/", utils.LoginRequired, handleLogout)
-	group.GET("/me/", utils.LoginRequired, handleMe)
+	group.POST("/logout/", middleware.LoginRequired, handleLogout)
+	group.GET("/me/", middleware.LoginRequired, handleMe)
 }
 
 func shouldSignUpUser(ctx *gin.Context, userForm *forms.UserForm) (*models.User, error) {
@@ -95,7 +96,7 @@ func handleLogout(ctx *gin.Context) {
 }
 
 func handleMe(ctx *gin.Context) {
-	user, err := utils.GetUserFromRequest(ctx)
+	user, err := middleware.GetUserFromRequest(ctx)
 	if err != nil {
 		ctx.AbortWithStatus(500)
 		return
