@@ -219,6 +219,7 @@ func (suite *TransactionRoutesSuit) TestHandlePatchTransaction() {
 		Date:        newDate,
 		User:        *suite.user,
 		Category:    *suite.category,
+		Account:     *suite.account,
 	}
 	expectedForm, err := utils.MarshalModelToForm[models.Transaction, forms.TransactionResponse](&expectedTransaction)
 	if err != nil {

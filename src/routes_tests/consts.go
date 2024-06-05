@@ -48,5 +48,6 @@ var (
 		Amount:      transactionAmount,
 		Date:        transactionDate,
 		Category:    categoryResponse,
+		Account:     accountResponse,
 	}
 )

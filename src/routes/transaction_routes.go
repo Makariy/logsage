@@ -22,24 +22,24 @@ func AddTransactionRoutes(router *gin.Engine) {
 	group.GET("/get/:id/",
 		middleware.AttachUserAndModel[models.Transaction](),
 		handleGetUserModel[models.Transaction, forms.TransactionResponse](
-			repository.GetModelByID[models.Transaction],
+			repository.GetTransactionByID,
 		),
 	)
 	group.POST("/create/",
 		handleCreateUserModel[models.Transaction, forms.TransactionForm, forms.TransactionResponse](
-			utils.ShouldGetForm[forms.TransactionForm], repository.CreateModel[models.Transaction],
+			utils.ShouldGetForm[forms.TransactionForm], repository.CreateTransactionFromModel,
 		),
 	)
 	group.PATCH("/patch/:id/",
 		middleware.AttachUserAndModel[models.Transaction](),
 		handlePatchModel[models.Transaction, forms.TransactionForm, forms.TransactionResponse](
-			utils.ShouldGetForm[forms.TransactionForm], repository.PatchModel[models.Transaction],
+			utils.ShouldGetForm[forms.TransactionForm], repository.PatchTransactionFromModel,
 		),
 	)
 	group.DELETE("/delete/:id/",
 		middleware.AttachUserAndModel[models.Transaction](),
 		handleDeleteModel[models.Transaction, forms.TransactionResponse](
-			repository.DeleteModel[models.Transaction],
+			repository.DeleteTransaction,
 		),
 	)
 }
@@ -55,7 +55,7 @@ func handleGetTransactions(ctx *gin.Context) {
 		return
 	}
 
-	transactions, err := repository.GetUserModelsWithDateRange[models.Transaction](
+	transactions, err := repository.GetUserTransactionsByDate(
 		user.ID,
 		dateRange.FromDate,
 		dateRange.ToDate,

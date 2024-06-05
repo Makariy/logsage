@@ -106,20 +106,27 @@ func getTransactionsBaseQuery(db *gorm.DB, fromDate, toDate time.Time) *gorm.DB 
 		Preload("Category." + clause.Associations)
 }
 
-//func GetTransactionsByDate(fromDate, toDate time.Time) ([]*models.Transaction, error) {
-//	db := db_connector.GetConnection()
-//
-//	var transactions []*models.Transaction
-//	tx := getTransactionsBaseQuery(db, fromDate, toDate).
-//		Find(&transactions)
-//
-//	if tx.Error != nil {
-//		return nil, tx.Error
-//	}
-//	return transactions, nil
-//}
+func GetUserTransactionsByDate(
+	userID models.ModelID,
+	fromDate, toDate time.Time,
+) ([]*models.Transaction, error) {
+	db := db_connector.GetConnection()
 
-func GetCategoryTransactionsByDate(categoryID models.ModelID, fromDate, toDate time.Time) ([]*models.Transaction, error) {
+	var transactions []*models.Transaction
+	tx := getTransactionsBaseQuery(db, fromDate, toDate).
+		Where("user_id = ?", userID).
+		Find(&transactions)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return transactions, nil
+}
+
+func GetCategoryTransactionsByDate(
+	categoryID models.ModelID,
+	fromDate, toDate time.Time,
+) ([]*models.Transaction, error) {
 	db := db_connector.GetConnection()
 
 	var transactions []*models.Transaction
@@ -133,7 +140,10 @@ func GetCategoryTransactionsByDate(categoryID models.ModelID, fromDate, toDate t
 	return transactions, nil
 }
 
-func GetAccountTransactionByDate(accountID models.ModelID, fromDate, toDate time.Time) ([]*models.Transaction, error) {
+func GetAccountTransactionByDate(
+	accountID models.ModelID,
+	fromDate, toDate time.Time,
+) ([]*models.Transaction, error) {
 	db := db_connector.GetConnection()
 
 	var transactions []*models.Transaction
@@ -145,4 +155,27 @@ func GetAccountTransactionByDate(accountID models.ModelID, fromDate, toDate time
 		return nil, tx.Error
 	}
 	return transactions, nil
+}
+
+func CreateTransactionFromModel(transaction *models.Transaction) (*models.Transaction, error) {
+	return CreateTransaction(
+		transaction.Description,
+		transaction.Amount,
+		transaction.Date,
+		transaction.UserID,
+		transaction.CategoryID,
+		transaction.AccountID,
+	)
+}
+
+func PatchTransactionFromModel(transaction *models.Transaction) (*models.Transaction, error) {
+	return PatchTransaction(
+		transaction.ID,
+		transaction.Description,
+		transaction.Amount,
+		transaction.Date,
+		transaction.User.ID,
+		transaction.Category.ID,
+		transaction.Account.ID,
+	)
 }
