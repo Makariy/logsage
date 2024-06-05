@@ -28,7 +28,7 @@ func (suite *AccountRoutesSuit) SetupTest() {
 	models.MigrateModels(db_connector.GetConnection())
 
 	suite.user = CreateTestUser(userEmail, userPassword)
-	suite.currency = CreateTestCurrency(currencyName)
+	suite.currency = CreateTestCurrency(currencyName, currencySymbol)
 	suite.authHeaders = GetAuthHeaders(suite.user)
 
 	suite.router = gin.Default()

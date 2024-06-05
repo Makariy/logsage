@@ -34,7 +34,7 @@ func (suite *TransactionRoutesSuit) SetupTest() {
 	models.MigrateModels(db_connector.GetConnection())
 
 	suite.user = CreateTestUser(userEmail, userPassword)
-	suite.currency = CreateTestCurrency(currencyName)
+	suite.currency = CreateTestCurrency(currencyName, currencySymbol)
 	suite.category = CreateTestCategory(categoryName, categoryType, suite.user.ID)
 	suite.account = CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
 	suite.authHeaders = GetAuthHeaders(suite.user)

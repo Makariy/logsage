@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func loadAccountToTransaction(transaction *models.Transaction) (*models.Transaction, error) {
+func preloadAccountToTransaction(transaction *models.Transaction) (*models.Transaction, error) {
 	account, err := GetModelByID[models.Account](transaction.AccountID)
 	if err != nil {
 		return nil, err
@@ -23,7 +23,7 @@ func GetTransactionByID(id models.ModelID) (*models.Transaction, error) {
 	if err != nil {
 		return nil, err
 	}
-	return loadAccountToTransaction(transaction)
+	return preloadAccountToTransaction(transaction)
 }
 
 func GetUserTransactions(userID models.ModelID) ([]*models.Transaction, error) {
@@ -61,7 +61,7 @@ func CreateTransaction(
 	if err != nil {
 		return nil, err
 	}
-	return loadAccountToTransaction(result)
+	return preloadAccountToTransaction(result)
 }
 
 func PatchTransaction(
@@ -86,7 +86,7 @@ func PatchTransaction(
 	if err != nil {
 		return nil, err
 	}
-	return loadAccountToTransaction(result)
+	return preloadAccountToTransaction(result)
 }
 
 func DeleteTransaction(id models.ModelID) (*models.Transaction, error) {
@@ -94,7 +94,7 @@ func DeleteTransaction(id models.ModelID) (*models.Transaction, error) {
 	if err != nil {
 		return nil, err
 	}
-	return loadAccountToTransaction(result)
+	return preloadAccountToTransaction(result)
 }
 
 func getTransactionsBaseQuery(db *gorm.DB, fromDate, toDate time.Time) *gorm.DB {

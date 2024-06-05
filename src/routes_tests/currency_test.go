@@ -30,7 +30,7 @@ func (suite *CurrencyRoutesSuit) TearDownTest() {
 }
 
 func (suite *CurrencyRoutesSuit) TestHandleGetAllCurrencies() {
-	currency, err := repository.CreateCurrency(currencyName)
+	currency, err := repository.CreateCurrency(currencyName, currencySymbol)
 	if err != nil {
 		suite.Error(err)
 	}

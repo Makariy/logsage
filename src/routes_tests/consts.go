@@ -14,7 +14,8 @@ var (
 	accountName    = "KuCoin"
 	accountBalance = decimal.NewFromInt(1000)
 
-	currencyName = "USDT"
+	currencyName   = "Dollar"
+	currencySymbol = "USD"
 
 	categoryName = "Test category"
 	categoryType = models.SPENDING
@@ -26,8 +27,9 @@ var (
 
 var (
 	currencyResponse = forms.CurrencyResponse{
-		ID:   1,
-		Name: currencyName,
+		ID:     1,
+		Name:   currencyName,
+		Symbol: currencySymbol,
 	}
 	categoryResponse = forms.CategoryResponse{
 		ID:   1,

@@ -10,6 +10,7 @@ import (
 func TestCurrenciesEqual(expected, actual *forms.CurrencyResponse, suite *suite.Suite) {
 	suite.Equal(expected.ID, actual.ID)
 	suite.Equal(expected.Name, actual.Name)
+	suite.Equal(expected.Symbol, actual.Symbol)
 }
 
 func TestCategoriesEqual(expected, actual *forms.CategoryResponse, suite *suite.Suite) {
@@ -33,6 +34,7 @@ func TestTransactionsEqual(expected, actual *forms.TransactionResponse, suite *s
 	suite.True(expected.Date.Truncate(time.Second).Equal(actual.Date.Truncate(time.Second)))
 
 	TestCategoriesEqual(&expected.Category, &actual.Category, suite)
+	TestAccountsEqual(&expected.Account, &actual.Account, suite)
 }
 
 func TestCategoryStatsEqual(expected, actual *forms.CategoryStatsResponse, suite *suite.Suite) {

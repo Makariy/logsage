@@ -1,8 +1,9 @@
 package forms
 
 type CurrencyResponse struct {
-	Name string `json:"name"`
-	ID   uint   `json:"id"`
+	Name   string `json:"name"`
+	Symbol string `json:"symbol"`
+	ID     uint   `json:"id"`
 }
 
 type CurrenciesResponse struct {

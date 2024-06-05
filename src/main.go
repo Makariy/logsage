@@ -19,6 +19,6 @@ func main() {
 
 	err := router.Run("localhost:8000")
 	if err != nil {
-		panic("Got an error executing gin")
+		panic("Got an error running gin: " + err.Error())
 	}
 }

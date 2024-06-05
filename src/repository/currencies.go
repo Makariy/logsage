@@ -8,9 +8,10 @@ func GetAllCurrencies() ([]*models.Currency, error) {
 	return GetAllModels[models.Currency]()
 }
 
-func CreateCurrency(name string) (*models.Currency, error) {
+func CreateCurrency(name, symbol string) (*models.Currency, error) {
 	currency := models.Currency{
-		Name: name,
+		Name:   name,
+		Symbol: symbol,
 	}
 	return CreateModel(&currency)
 }

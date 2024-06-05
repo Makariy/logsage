@@ -169,7 +169,7 @@ func handleGetUserModel[Model any, ResponseForm any](
 	}
 }
 
-func handleGetUserModelFromContext[Model any, ResponseForm any](ctx *gin.Context) {
+func handleModelFromContext[Model any, ResponseForm any](ctx *gin.Context) {
 	model, exists := middleware.GetFromContext[*Model](ctx, middleware.ModelKey)
 	if !exists {
 		return
