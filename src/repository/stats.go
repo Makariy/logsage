@@ -175,7 +175,32 @@ func GetCategoriesStats(userID models.ModelID, fromDate, toDate time.Time) ([]*m
 	return categoriesStats, nil
 }
 
-func GetTotalStats(userID models.ModelID, fromDate, toDate time.Time) (*models.TotalStats, error) {
+func GetTotalCategoriesStats(userID models.ModelID, fromDate, toDate time.Time) (*models.TotalCategoriesStats, error) {
+	db := db_connector.GetConnection()
+
+	totalEarnedAmount, err := getTotalTransactedAmount(db, fromDate, toDate, models.EARNING)
+	if err != nil {
+		return nil, err
+	}
+	totalSpentAmount, err := getTotalTransactedAmount(db, fromDate, toDate, models.SPENDING)
+	if err != nil {
+		return nil, err
+	}
+
+	categoriesStats, err := GetCategoriesStats(userID, fromDate, toDate)
+	if err != nil {
+		return nil, err
+	}
+
+	stats := models.TotalCategoriesStats{
+		TotalEarnedAmount: totalEarnedAmount,
+		TotalSpentAmount:  totalSpentAmount,
+		CategoriesStats:   categoriesStats,
+	}
+	return &stats, nil
+}
+
+func GetTotalAccountsStats(userID models.ModelID, fromDate, toDate time.Time) (*models.TotalAccountsStats, error) {
 	db := db_connector.GetConnection()
 
 	totalEarnedAmount, err := getTotalTransactedAmount(db, fromDate, toDate, models.EARNING)
@@ -192,16 +217,10 @@ func GetTotalStats(userID models.ModelID, fromDate, toDate time.Time) (*models.T
 		return nil, err
 	}
 
-	categoriesStats, err := GetCategoriesStats(userID, fromDate, toDate)
-	if err != nil {
-		return nil, err
-	}
-
-	stats := models.TotalStats{
+	stats := models.TotalAccountsStats{
 		TotalEarnedAmount: totalEarnedAmount,
 		TotalSpentAmount:  totalSpentAmount,
 		AccountsStats:     accountsStats,
-		CategoriesStats:   categoriesStats,
 	}
 	return &stats, nil
 }

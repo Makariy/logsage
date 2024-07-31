@@ -14,7 +14,8 @@ func AddStatsRoutes(router *gin.Engine) {
 	group := router.Group("/stats")
 	group.Use(middleware.LoginRequired)
 
-	group.GET("/all/", middleware.AttachDateRange, handleGetTotalStats)
+	group.GET("/category/all/", middleware.AttachDateRange, handleGetTotalCategoriesStats)
+	group.GET("/account/all/", middleware.AttachDateRange, handleGetTotalAccountsStats)
 	group.GET("/category/:id/",
 		middleware.AttachDateRange,
 		middleware.AttachUserAndModel[models.Category](),
@@ -89,7 +90,7 @@ func handleGetAccountStats(ctx *gin.Context) {
 	})
 }
 
-func handleGetTotalStats(ctx *gin.Context) {
+func handleGetTotalCategoriesStats(ctx *gin.Context) {
 	user, err := middleware.GetUserFromRequest(ctx)
 	if err != nil {
 		ctx.AbortWithStatus(500)
@@ -102,13 +103,39 @@ func handleGetTotalStats(ctx *gin.Context) {
 		return
 	}
 
-	stats, err := repository.GetTotalStats(user.ID, dateRange.FromDate, dateRange.ToDate)
+	stats, err := repository.GetTotalCategoriesStats(user.ID, dateRange.FromDate, dateRange.ToDate)
 	if err != nil {
 		ctx.AbortWithStatus(500)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, forms.TotalStatsResponse{
+	ctx.JSON(http.StatusOK, forms.TotalCategoriesStatsResponse{
+		SuccessResponse: forms.Success,
+		DateRange:       dateRange.ToDateRange(),
+		Stats:           *stats,
+	})
+}
+
+func handleGetTotalAccountsStats(ctx *gin.Context) {
+	user, err := middleware.GetUserFromRequest(ctx)
+	if err != nil {
+		ctx.AbortWithStatus(500)
+		return
+	}
+
+	dateRange, exists := middleware.GetFromContext[*forms.DateTimeRange](ctx, middleware.DateRangeKey)
+	if !exists {
+		ctx.AbortWithStatus(500)
+		return
+	}
+
+	stats, err := repository.GetTotalAccountsStats(user.ID, dateRange.FromDate, dateRange.ToDate)
+	if err != nil {
+		ctx.AbortWithStatus(500)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, forms.TotalAccountsStatsResponse{
 		SuccessResponse: forms.Success,
 		DateRange:       dateRange.ToDateRange(),
 		Stats:           *stats,

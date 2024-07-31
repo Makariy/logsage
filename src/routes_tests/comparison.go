@@ -47,6 +47,10 @@ func TestAccountStatsEqual(expected, actual *forms.AccountStatsResponse, suite *
 	repository_tests.TestAccountStatsEqual(&expected.Stats, &actual.Stats, suite)
 }
 
-func TestTotalStatsEqual(expected, actual *forms.TotalStatsResponse, suite *suite.Suite) {
-	repository_tests.TestTotalStatsEqual(&expected.Stats, &actual.Stats, suite)
+func TestTotalAccountsStatsEqual(expected, actual *forms.TotalAccountsStatsResponse, suite *suite.Suite) {
+	repository_tests.TestTotalAccountsStatsEqual(&expected.Stats, &actual.Stats, suite)
+}
+
+func TestTotalCategoriesStatsEqual(expected, actual *forms.TotalCategoriesStatsResponse, suite *suite.Suite) {
+	repository_tests.TestTotalCategoriesStatsEqual(&expected.Stats, &actual.Stats, suite)
 }

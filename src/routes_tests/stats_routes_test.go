@@ -180,22 +180,22 @@ func (suite *StatsRoutesSuit) TestHandleGetAccountStats() {
 	TestAccountStatsEqual(&expected, accountStats, &suite.Suite)
 }
 
-func (suite *StatsRoutesSuit) TestHandleGetTotalStats() {
+func (suite *StatsRoutesSuit) TestHandleGetTotalAccountsStats() {
 	resp := PerformTestRequest(
 		suite.router,
 		"GET",
-		fmt.Sprintf("/stats/all/?%s", getDateRange()),
+		fmt.Sprintf("/stats/account/all/?%s", getDateRange()),
 		nil,
 		&suite.authHeaders,
 	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
 
-	stats, err := UnmarshalResponse[forms.TotalStatsResponse](resp)
+	stats, err := UnmarshalResponse[forms.TotalAccountsStatsResponse](resp)
 	suite.True(err == nil)
 
-	expected := forms.TotalStatsResponse{
+	expected := forms.TotalAccountsStatsResponse{
 		DateRange: &dateRange,
-		Stats: models.TotalStats{
+		Stats: models.TotalAccountsStats{
 			TotalEarnedAmount: decimal.NewFromInt(200),
 			TotalSpentAmount:  decimal.NewFromInt(600),
 			AccountsStats: []*models.AccountStats{
@@ -213,6 +213,30 @@ func (suite *StatsRoutesSuit) TestHandleGetTotalStats() {
 					},
 				},
 			},
+		},
+	}
+
+	TestTotalAccountsStatsEqual(&expected, stats, &suite.Suite)
+}
+
+func (suite *StatsRoutesSuit) TestHandleGetTotalCategoriesStats() {
+	resp := PerformTestRequest(
+		suite.router,
+		"GET",
+		fmt.Sprintf("/stats/category/all/?%s", getDateRange()),
+		nil,
+		&suite.authHeaders,
+	)
+	AssertResponseSuccess(200, resp, &suite.Suite)
+
+	stats, err := UnmarshalResponse[forms.TotalCategoriesStatsResponse](resp)
+	suite.True(err == nil)
+
+	expected := forms.TotalCategoriesStatsResponse{
+		DateRange: &dateRange,
+		Stats: models.TotalCategoriesStats{
+			TotalEarnedAmount: decimal.NewFromInt(200),
+			TotalSpentAmount:  decimal.NewFromInt(600),
 			CategoriesStats: []*models.CategoryStats{
 				{
 					Category:     *suite.category,
@@ -236,5 +260,5 @@ func (suite *StatsRoutesSuit) TestHandleGetTotalStats() {
 		},
 	}
 
-	TestTotalStatsEqual(&expected, stats, &suite.Suite)
+	TestTotalCategoriesStatsEqual(&expected, stats, &suite.Suite)
 }

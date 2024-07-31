@@ -178,7 +178,7 @@ components:
         dateTo:
           type: number
 
-    totalStats:
+    totalAccountsStats:
       type: object
       properties:
         dateRange:
@@ -191,6 +191,16 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/accountStats"
+
+    totalCategoriesStats:
+      type: object
+      properties:
+        dateRange:
+          $ref: "#/components/schemas/dateRange"
+        totalEarnedAmount:
+          type: number
+        totalSpentAmount:
+          type: number
         categoriesStats:
           type: array
           items:
@@ -907,9 +917,9 @@ paths:
                 $ref: "#/components/schemas/errorAuthRequired"
 
 
-  /stats/all/:
+  /stats/account/all/:
     get:
-      description: Get all analytics
+      description: Get all accounts analytics for date period
       parameters:
         - name: fromDate
           in: query
@@ -933,7 +943,7 @@ paths:
                 type: object
                 properties:
                   stats:
-                    $ref: "#/components/schemas/totalStats"
+                    $ref: "#/components/schemas/totalAccountsStats"
 
         '400':
           description: Bad request
@@ -948,5 +958,48 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/errorAuthRequired"
+
+  /stats/category/all/:
+    get:
+      description: Get all categories analytics for date period
+      parameters:
+        - name: fromDate
+          in: query
+          description: Date from
+          schema:
+            type: number
+            required: true
+        - name: toDate
+          in: query
+          description: Date to
+          schema:
+            type: number
+            required: true
+
+      responses:
+        '200':
+          description: Request succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stats:
+                    $ref: "#/components/schemas/totalCategoriesStats"
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+        '403':
+          description: Authorization required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorAuthRequired"
+
 
 

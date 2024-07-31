@@ -68,17 +68,22 @@ func TestAccountStatsEqual(expected, actual *models.AccountStats, suite *suite.S
 	}
 }
 
-func TestTotalStatsEqual(expected, actual *models.TotalStats, suite *suite.Suite) {
+func TestTotalCategoriesStatsEqual(expected, actual *models.TotalCategoriesStats, suite *suite.Suite) {
+	suite.True(expected.TotalEarnedAmount.Equal(actual.TotalEarnedAmount))
+	suite.True(expected.TotalSpentAmount.Equal(actual.TotalSpentAmount))
+
+	suite.Equal(len(expected.CategoriesStats), len(actual.CategoriesStats))
+	for i := range expected.CategoriesStats {
+		TestCategoriesStatsEqual(expected.CategoriesStats[i], actual.CategoriesStats[i], suite)
+	}
+}
+
+func TestTotalAccountsStatsEqual(expected, actual *models.TotalAccountsStats, suite *suite.Suite) {
 	suite.True(expected.TotalEarnedAmount.Equal(actual.TotalEarnedAmount))
 	suite.True(expected.TotalSpentAmount.Equal(actual.TotalSpentAmount))
 
 	suite.Equal(len(expected.AccountsStats), len(actual.AccountsStats))
 	for i := range expected.AccountsStats {
 		TestAccountStatsEqual(expected.AccountsStats[i], actual.AccountsStats[i], suite)
-	}
-
-	suite.Equal(len(expected.CategoriesStats), len(actual.CategoriesStats))
-	for i := range expected.CategoriesStats {
-		TestCategoriesStatsEqual(expected.CategoriesStats[i], actual.CategoriesStats[i], suite)
 	}
 }

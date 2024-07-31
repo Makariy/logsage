@@ -16,8 +16,14 @@ type AccountStatsResponse struct {
 	Stats   models.AccountStats `json:"stats"`
 }
 
-type TotalStatsResponse struct {
+type TotalCategoriesStatsResponse struct {
 	*SuccessResponse
 	*DateRange
-	Stats models.TotalStats `json:"stats"`
+	Stats models.TotalCategoriesStats `json:"stats"`
+}
+
+type TotalAccountsStatsResponse struct {
+	*SuccessResponse
+	*DateRange
+	Stats models.TotalAccountsStats `json:"stats"`
 }

@@ -132,28 +132,9 @@ func (suite *StatsRepositorySuit) TestGetAccountStats() {
 	TestAccountStatsEqual(&expected, accountStats, &suite.Suite)
 }
 
-func (suite *StatsRepositorySuit) TestGetTotalStats() {
-	totalStats, err := repository.GetTotalStats(suite.user.ID, fromDate, toDate)
+func (suite *StatsRepositorySuit) TestGetTotalAccountsStats() {
+	totalStats, err := repository.GetTotalAccountsStats(suite.user.ID, fromDate, toDate)
 	suite.True(err == nil)
-
-	firstCategoryStats := models.CategoryStats{
-		Category:     *suite.firstCategory,
-		TotalAmount:  decimal.NewFromInt(400),
-		TotalPercent: decimal.NewFromFloat(1. / 2),
-		Transactions: []*models.Transaction{
-			transaction1,
-			transaction2,
-		},
-	}
-	secondCategoryStats := models.CategoryStats{
-		Category:     *suite.secondCategory,
-		TotalAmount:  decimal.NewFromInt(400),
-		TotalPercent: decimal.NewFromFloat(1. / 2),
-		Transactions: []*models.Transaction{
-			transaction3,
-			transaction4,
-		},
-	}
 
 	firstAccountStats := models.AccountStats{
 		Account:            *suite.firstAccount,
@@ -179,18 +160,49 @@ func (suite *StatsRepositorySuit) TestGetTotalStats() {
 		},
 	}
 
-	expected := models.TotalStats{
+	expected := models.TotalAccountsStats{
 		TotalEarnedAmount: decimal.NewFromInt(400),
 		TotalSpentAmount:  decimal.NewFromInt(400),
 		AccountsStats: []*models.AccountStats{
 			&firstAccountStats,
 			&secondAccountStats,
 		},
+	}
+
+	TestTotalAccountsStatsEqual(&expected, totalStats, &suite.Suite)
+}
+
+func (suite *StatsRepositorySuit) TestGetTotalCategoriesStats() {
+	totalStats, err := repository.GetTotalCategoriesStats(suite.user.ID, fromDate, toDate)
+	suite.True(err == nil)
+
+	firstCategoryStats := models.CategoryStats{
+		Category:     *suite.firstCategory,
+		TotalAmount:  decimal.NewFromInt(400),
+		TotalPercent: decimal.NewFromFloat(1. / 2),
+		Transactions: []*models.Transaction{
+			transaction1,
+			transaction2,
+		},
+	}
+	secondCategoryStats := models.CategoryStats{
+		Category:     *suite.secondCategory,
+		TotalAmount:  decimal.NewFromInt(400),
+		TotalPercent: decimal.NewFromFloat(1. / 2),
+		Transactions: []*models.Transaction{
+			transaction3,
+			transaction4,
+		},
+	}
+
+	expected := models.TotalCategoriesStats{
+		TotalEarnedAmount: decimal.NewFromInt(400),
+		TotalSpentAmount:  decimal.NewFromInt(400),
 		CategoriesStats: []*models.CategoryStats{
 			&firstCategoryStats,
 			&secondCategoryStats,
 		},
 	}
 
-	TestTotalStatsEqual(&expected, totalStats, &suite.Suite)
+	TestTotalCategoriesStatsEqual(&expected, totalStats, &suite.Suite)
 }

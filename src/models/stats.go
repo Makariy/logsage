@@ -22,10 +22,16 @@ type AccountStats struct {
 	Transactions []*Transaction `json:"transactions"`
 }
 
-type TotalStats struct {
+type TotalAccountsStats struct {
 	TotalEarnedAmount decimal.Decimal `json:"totalEarnedAmount"`
 	TotalSpentAmount  decimal.Decimal `json:"totalSpentAmount"`
 
-	AccountsStats   []*AccountStats  `json:"accountsStats"`
+	AccountsStats []*AccountStats `json:"accountsStats"`
+}
+
+type TotalCategoriesStats struct {
+	TotalEarnedAmount decimal.Decimal `json:"totalEarnedAmount"`
+	TotalSpentAmount  decimal.Decimal `json:"totalSpentAmount"`
+
 	CategoriesStats []*CategoryStats `json:"categoriesStats"`
 }
