@@ -169,8 +169,8 @@ func (suite *TransactionRoutesSuit) TestHandleGetAllTransactions() {
 		suite.Error(err)
 	}
 
-	TestTransactionsEqual(firstForm, response.Transactions[0], &suite.Suite)
-	TestTransactionsEqual(secondForm, response.Transactions[1], &suite.Suite)
+	TestTransactionsEqual(firstForm, response.Transactions[1], &suite.Suite)
+	TestTransactionsEqual(secondForm, response.Transactions[0], &suite.Suite)
 }
 
 func (suite *TransactionRoutesSuit) TestHandlePatchTransaction() {

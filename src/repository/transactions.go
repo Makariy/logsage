@@ -115,6 +115,7 @@ func GetUserTransactionsByDate(
 	var transactions []*models.Transaction
 	tx := getTransactionsBaseQuery(db, fromDate, toDate).
 		Where("user_id = ?", userID).
+		Order("date desc").
 		Find(&transactions)
 
 	if tx.Error != nil {
