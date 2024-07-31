@@ -20,24 +20,24 @@ func AddAuthRoutes(router *gin.Engine) {
 	group.GET("/me/", middleware.LoginRequired, handleMe)
 }
 
-func shouldSignUpUser(ctx *gin.Context, userForm *forms.UserForm) (*models.User, error) {
-	user, err := auth.SignUpUser(ctx, userForm.Email, userForm.Password)
+func shouldSignUpUser(ctx *gin.Context, userForm *forms.UserForm) (*models.User, auth.AuthToken, error) {
+	user, token, err := auth.SignUpUser(ctx, userForm.Email, userForm.Password)
 	if err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			ctx.JSON(http.StatusBadRequest, forms.ErrorResponse{
 				Status: "Bad request",
 				Error:  "A user with this email already exists",
 			})
-			return nil, err
+			return nil, "", err
 		} else {
 			ctx.JSON(http.StatusBadRequest, forms.ErrorResponse{
 				Status: "Bad request",
 				Error:  "Cannot sign up",
 			})
-			return nil, err
+			return nil, "", err
 		}
 	}
-	return user, nil
+	return user, token, nil
 }
 
 func handleLogin(ctx *gin.Context) {
@@ -55,7 +55,7 @@ func handleLogin(ctx *gin.Context) {
 		return
 	}
 
-	err = auth.Authorize(ctx, user)
+	token, err := auth.Authorize(ctx, user)
 	if err != nil {
 		ctx.AbortWithStatus(500)
 		return
@@ -65,6 +65,7 @@ func handleLogin(ctx *gin.Context) {
 		SuccessResponse: forms.Success,
 		Email:           user.Email,
 		LastLogin:       user.LastLogin,
+		Token:           token,
 	})
 }
 
@@ -74,7 +75,7 @@ func handleSignUp(ctx *gin.Context) {
 		return
 	}
 
-	user, err := shouldSignUpUser(ctx, userForm)
+	user, token, err := shouldSignUpUser(ctx, userForm)
 	if err != nil {
 		return
 	}
@@ -83,6 +84,7 @@ func handleSignUp(ctx *gin.Context) {
 		SuccessResponse: forms.Success,
 		Email:           user.Email,
 		LastLogin:       user.LastLogin,
+		Token:           token,
 	})
 }
 

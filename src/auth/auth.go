@@ -25,23 +25,23 @@ func RenderAuthorizationHeader(token AuthToken) string {
 	return fmt.Sprintf("Token %s", token)
 }
 
-func Authorize(context *gin.Context, user *models.User) error {
+func Authorize(context *gin.Context, user *models.User) (AuthToken, error) {
 	token := CreateAuthToken()
 	context.Header("Authorization", RenderAuthorizationHeader(token))
 
-	return SetUserByToken(user, token)
+	return token, SetUserByToken(user, token)
 }
 
-func SignUpUser(context *gin.Context, email, pass string) (*models.User, error) {
+func SignUpUser(context *gin.Context, email, pass string) (*models.User, AuthToken, error) {
 	user, err := repository.CreateUser(email, pass)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
-	err = Authorize(context, user)
+	token, err := Authorize(context, user)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
-	return user, nil
+	return user, token, nil
 }
 
 func LogoutUser(context *gin.Context) error {
