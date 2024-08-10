@@ -21,18 +21,18 @@ func GetUserByCredentials(email, password string) (*models.User, error) {
 	return user, nil
 }
 
-func RenderAuthorizationHeader(token AuthToken) string {
+func RenderAuthorizationHeader(token models.AuthToken) string {
 	return fmt.Sprintf("Token %s", token)
 }
 
-func Authorize(context *gin.Context, user *models.User) (AuthToken, error) {
+func Authorize(context *gin.Context, user *models.User) (models.AuthToken, error) {
 	token := CreateAuthToken()
 	context.Header("Authorization", RenderAuthorizationHeader(token))
 
 	return token, SetUserByToken(user, token)
 }
 
-func SignUpUser(context *gin.Context, email, pass string) (*models.User, AuthToken, error) {
+func SignUpUser(context *gin.Context, email, pass string) (*models.User, models.AuthToken, error) {
 	user, err := repository.CreateUser(email, pass)
 	if err != nil {
 		return nil, "", err

@@ -13,8 +13,6 @@ type UserSettable interface {
 	SetUser(*User)
 }
 
-type ModelID uint
-
 func (modelID ModelID) Value() (driver.Value, error) {
 	result := int64(modelID)
 	return result, nil

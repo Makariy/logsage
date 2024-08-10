@@ -33,7 +33,7 @@ func GetUserFromRequest(ctx *gin.Context) (*models.User, error) {
 		return nil, err
 	}
 
-	user, err := auth.GetUserByToken(auth.AuthToken(token))
+	user, err := auth.GetUserByToken(models.AuthToken(token))
 	if err != nil {
 		return nil, err
 	}

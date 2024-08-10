@@ -1,7 +1,7 @@
 package forms
 
 import (
-	"main/auth"
+	"main/models"
 	"time"
 )
 
@@ -12,7 +12,7 @@ type UserForm struct {
 
 type UserResponse struct {
 	*SuccessResponse
-	Email     string         `json:"email"`
-	LastLogin time.Time      `json:"lastLogin"`
-	Token     auth.AuthToken `json:"token"`
+	Email     string           `json:"email"`
+	LastLogin time.Time        `json:"lastLogin"`
+	Token     models.AuthToken `json:"token"`
 }

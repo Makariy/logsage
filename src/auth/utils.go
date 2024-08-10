@@ -5,10 +5,9 @@ import (
 	"encoding/base64"
 	"errors"
 	"github.com/gin-gonic/gin"
+	"main/models"
 	"regexp"
 )
-
-type AuthToken string
 
 var AuthTokenRegex = regexp.MustCompile("Token (\\S+)")
 
@@ -17,13 +16,13 @@ var (
 	InvalidTokenFormatError = errors.New("invalid token format")
 )
 
-func CreateAuthToken() AuthToken {
+func CreateAuthToken() models.AuthToken {
 	token := make([]byte, 32)
 	_, err := rand.Read(token)
 	if err != nil {
 		panic(err)
 	}
-	return AuthToken(base64.URLEncoding.EncodeToString(token))
+	return models.AuthToken(base64.URLEncoding.EncodeToString(token))
 }
 
 func GetTokenFromRequest(context *gin.Context) ([]byte, error) {

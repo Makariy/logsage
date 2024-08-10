@@ -20,7 +20,7 @@ func AddAuthRoutes(router *gin.Engine) {
 	group.GET("/me/", middleware.LoginRequired, handleMe)
 }
 
-func shouldSignUpUser(ctx *gin.Context, userForm *forms.UserForm) (*models.User, auth.AuthToken, error) {
+func shouldSignUpUser(ctx *gin.Context, userForm *forms.UserForm) (*models.User, models.AuthToken, error) {
 	user, token, err := auth.SignUpUser(ctx, userForm.Email, userForm.Password)
 	if err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {

@@ -11,7 +11,7 @@ func getUserKeyById(id models.ModelID) ([]byte, error) {
 	return cache.GetKeyByPattern(pattern)
 }
 
-func getUserKeyByToken(token AuthToken) ([]byte, error) {
+func getUserKeyByToken(token models.AuthToken) ([]byte, error) {
 	pattern := getUserKeyPatternByToken(token)
 	return cache.GetKeyByPattern(pattern)
 }
@@ -61,7 +61,7 @@ func GetUserByID(id models.ModelID) (*models.User, error) {
 	return getUserByKey(string(key))
 }
 
-func GetUserByToken(token AuthToken) (*models.User, error) {
+func GetUserByToken(token models.AuthToken) (*models.User, error) {
 	key, err := getUserKeyByToken(token)
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ func GetUserByToken(token AuthToken) (*models.User, error) {
 	return getUserByKey(string(key))
 }
 
-func SetUserByToken(user *models.User, token AuthToken) error {
+func SetUserByToken(user *models.User, token models.AuthToken) error {
 	previousKey, err := getUserKeyById(user.ID)
 	if previousKey != nil && err == nil {
 		err = DelUser(user)
