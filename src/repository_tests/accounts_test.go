@@ -1,43 +1,41 @@
 package repository_tests
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/suite"
-	"main/db_connector"
 	"main/models"
 	"main/repository"
-	"main/test_utils"
 )
 
 type AccountRepositorySuit struct {
 	suite.Suite
-	router   *gin.Engine
-	user     *models.User
-	currency *models.Currency
+	base DefaultRepositorySuite
 }
 
 func (suite *AccountRepositorySuit) SetupTest() {
-	test_utils.CreateTestDB()
-	models.MigrateModels(db_connector.GetConnection())
-
-	suite.user = CreateTestUser(userEmail, userPassword)
-	suite.currency = CreateTestCurrency(currencyName)
+	suite.base.setupDB()
+	suite.base.createDefaultUser()
+	suite.base.createDefaultCurrencies()
 }
 
 func (suite *AccountRepositorySuit) TearDownTest() {
-	test_utils.DropTestDB()
+	suite.base.TearDownTest()
 }
 
 func (suite *AccountRepositorySuit) TestCreateAccount() {
-	account := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
+	account := CreateTestAccount(
+		accountName,
+		accountBalance,
+		suite.base.user.ID,
+		suite.base.firstCurrency.ID,
+	)
 
 	expected := models.Account{
 		ID:       1,
 		Name:     accountName,
 		Balance:  accountBalance,
-		Currency: *suite.currency,
-		User:     *suite.user,
+		Currency: *suite.base.firstCurrency,
+		User:     *suite.base.user,
 	}
 
 	TestAccountsEqual(&expected, account, &suite.Suite)
@@ -48,8 +46,19 @@ func (suite *AccountRepositorySuit) TestPatchAccount() {
 		newAccountName = "New test account name"
 		newBalance     = decimal.NewFromInt(2000)
 	)
-	account := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
-	patched, err := repository.PatchAccount(account.ID, newAccountName, newBalance, account.CurrencyID, suite.user.ID)
+	account := CreateTestAccount(
+		accountName,
+		accountBalance,
+		suite.base.user.ID,
+		suite.base.firstCurrency.ID,
+	)
+	patched, err := repository.PatchAccount(
+		account.ID,
+		newAccountName,
+		newBalance,
+		account.CurrencyID,
+		suite.base.user.ID,
+	)
 	if err != nil {
 		suite.Error(err)
 	}
@@ -58,14 +67,14 @@ func (suite *AccountRepositorySuit) TestPatchAccount() {
 		ID:       account.ID,
 		Name:     newAccountName,
 		Balance:  newBalance,
-		Currency: *suite.currency,
-		User:     *suite.user,
+		Currency: *suite.base.firstCurrency,
+		User:     *suite.base.user,
 	}
 	TestAccountsEqual(&expected, patched, &suite.Suite)
 }
 
 func (suite *AccountRepositorySuit) TestGetAccountByID() {
-	account := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
+	account := CreateTestAccount(accountName, accountBalance, suite.base.user.ID, suite.base.firstCurrency.ID)
 
 	foundAccount, err := repository.GetAccountByID(account.ID)
 	if err != nil {
@@ -78,18 +87,18 @@ func (suite *AccountRepositorySuit) TestGetAccountByID() {
 func (suite *AccountRepositorySuit) TestGetUserAccounts() {
 	secondBalance := decimal.NewFromInt(200)
 
-	first := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
+	first := CreateTestAccount(accountName, accountBalance, suite.base.user.ID, suite.base.firstCurrency.ID)
 	second, err := repository.CreateAccount(
-		suite.user.ID,
+		suite.base.user.ID,
 		"Second account",
 		secondBalance,
-		suite.currency.ID,
+		suite.base.firstCurrency.ID,
 	)
 	if err != nil {
 		suite.Error(err)
 	}
 
-	accounts, err := repository.GetUserAccounts(suite.user.ID)
+	accounts, err := repository.GetUserAccounts(suite.base.user.ID)
 	if err != nil {
 		suite.Error(err)
 	}
@@ -97,7 +106,7 @@ func (suite *AccountRepositorySuit) TestGetUserAccounts() {
 	suite.Equal(len(accounts), 2)
 
 	for _, account := range accounts {
-		TestUsersEqual(suite.user, &account.User, &suite.Suite)
+		TestUsersEqual(suite.base.user, &account.User, &suite.Suite)
 	}
 
 	isFirstFirst := accounts[0].ID == first.ID
@@ -111,7 +120,7 @@ func (suite *AccountRepositorySuit) TestGetUserAccounts() {
 }
 
 func (suite *AccountRepositorySuit) TestDeleteAccount() {
-	account := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
+	account := CreateTestAccount(accountName, accountBalance, suite.base.user.ID, suite.base.firstCurrency.ID)
 
 	result, err := repository.DeleteAccount(account.ID)
 	if err != nil {

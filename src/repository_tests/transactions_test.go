@@ -1,37 +1,28 @@
 package repository_tests
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/suite"
-	"main/db_connector"
 	"main/models"
 	"main/repository"
-	"main/test_utils"
 	"time"
 )
 
 type TransactionRepositorySuit struct {
 	suite.Suite
-	router   *gin.Engine
-	user     *models.User
-	currency *models.Currency
-	category *models.Category
-	account  *models.Account
+	base DefaultRepositorySuite
 }
 
 func (suite *TransactionRepositorySuit) SetupTest() {
-	test_utils.CreateTestDB()
-	models.MigrateModels(db_connector.GetConnection())
-
-	suite.user = CreateTestUser(userEmail, userPassword)
-	suite.currency = CreateTestCurrency(currencyName)
-	suite.category = CreateTestCategory(suite.user.ID, categoryName, categoryType)
-	suite.account = CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
+	suite.base.setupDB()
+	suite.base.createDefaultUser()
+	suite.base.createDefaultCurrencies()
+	suite.base.createDefaultCategories()
+	suite.base.createDefaultAccounts()
 }
 
 func (suite *TransactionRepositorySuit) TearDownTest() {
-	test_utils.DropTestDB()
+	suite.base.TearDownTest()
 }
 
 func (suite *TransactionRepositorySuit) TestCreateTransaction() {
@@ -39,9 +30,9 @@ func (suite *TransactionRepositorySuit) TestCreateTransaction() {
 		transactionDescription,
 		transactionAmount,
 		transactionDate,
-		suite.user.ID,
-		suite.category.ID,
-		suite.account.ID,
+		suite.base.user.ID,
+		suite.base.firstCategory.ID,
+		suite.base.firstAccount.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -52,9 +43,9 @@ func (suite *TransactionRepositorySuit) TestCreateTransaction() {
 		Description: transactionDescription,
 		Amount:      transactionAmount,
 		Date:        transactionDate,
-		User:        *suite.user,
-		Category:    *suite.category,
-		Account:     *suite.account,
+		User:        *suite.base.user,
+		Category:    *suite.base.firstCategory,
+		Account:     *suite.base.firstAccount,
 	}
 
 	TestTransactionsEqual(&expected, transaction, &suite.Suite)
@@ -65,9 +56,9 @@ func (suite *TransactionRepositorySuit) TestGetTransactionByID() {
 		transactionDescription,
 		transactionAmount,
 		transactionDate,
-		suite.user.ID,
-		suite.category.ID,
-		suite.account.ID,
+		suite.base.user.ID,
+		suite.base.firstCategory.ID,
+		suite.base.firstAccount.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -96,9 +87,9 @@ func (suite *TransactionRepositorySuit) TestGetAllTransactions() {
 		transactionDescription,
 		transactionAmount,
 		transactionDate,
-		suite.user.ID,
-		suite.category.ID,
-		suite.account.ID,
+		suite.base.user.ID,
+		suite.base.firstCategory.ID,
+		suite.base.firstAccount.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -107,22 +98,22 @@ func (suite *TransactionRepositorySuit) TestGetAllTransactions() {
 		"Other transaction",
 		decimal.NewFromInt(500),
 		time.Now(),
-		suite.user.ID,
-		suite.category.ID,
-		suite.account.ID,
+		suite.base.user.ID,
+		suite.base.firstCategory.ID,
+		suite.base.firstAccount.ID,
 	)
 	if err != nil {
 		suite.Error(err)
 	}
 
-	transactions, err := repository.GetUserTransactions(suite.user.ID)
+	transactions, err := repository.GetUserTransactions(suite.base.user.ID)
 	if err != nil {
 		suite.Error(err)
 	}
 	suite.Equal(2, len(transactions))
 
 	for _, transaction := range transactions {
-		TestUsersEqual(suite.user, &transaction.User, &suite.Suite)
+		TestUsersEqual(suite.base.user, &transaction.User, &suite.Suite)
 	}
 
 	isFirstFirst := transactions[0].ID == first.ID
@@ -140,9 +131,9 @@ func (suite *TransactionRepositorySuit) TestPatchTransaction() {
 		transactionDescription,
 		transactionAmount,
 		transactionDate,
-		suite.user.ID,
-		suite.category.ID,
-		suite.account.ID,
+		suite.base.user.ID,
+		suite.base.firstCategory.ID,
+		suite.base.firstAccount.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -159,9 +150,9 @@ func (suite *TransactionRepositorySuit) TestPatchTransaction() {
 		newDescription,
 		newAmount,
 		newDate,
-		suite.user.ID,
-		suite.category.ID,
-		suite.account.ID,
+		suite.base.user.ID,
+		suite.base.firstCategory.ID,
+		suite.base.firstAccount.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -185,9 +176,9 @@ func (suite *TransactionRepositorySuit) TestDeleteTransaction() {
 		transactionDescription,
 		transactionAmount,
 		transactionDate,
-		suite.user.ID,
-		suite.category.ID,
-		suite.account.ID,
+		suite.base.user.ID,
+		suite.base.firstCategory.ID,
+		suite.base.firstAccount.ID,
 	)
 	if err != nil {
 		suite.Error(err)

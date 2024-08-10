@@ -14,8 +14,8 @@ func CreateTestUser(userEmail, userPassword string) *models.User {
 	return user
 }
 
-func CreateTestCurrency(currencyName string) *models.Currency {
-	currency, err := repository.CreateCurrency(currencyName, currencyName)
+func CreateTestCurrency(currencyName string, value decimal.Decimal) *models.Currency {
+	currency, err := repository.CreateCurrency(currencyName, currencyName, value)
 	if err != nil {
 		panic("could not create test currency")
 	}
