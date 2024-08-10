@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"main/utils"
 	"os"
 	"strconv"
 )
@@ -19,11 +20,20 @@ var (
 var db *gorm.DB
 
 func getConnConfig(dbName string) gorm.Dialector {
+	utils.CheckEnvNotEmpty(map[string]string{
+		"host":     DBHost,
+		"user":     DBUser,
+		"name":     DBName,
+		"password": DBPassword,
+		"port":     DBPort,
+	}, "Database connection env %s is empty")
+
 	port, err := strconv.Atoi(DBPort)
 	if err != nil {
 		errLog := fmt.Sprintf("Could not recognize port: %v", port)
 		panic(errLog)
 	}
+
 	connConfig := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
 		DBHost, DBUser, DBPassword, dbName, port,

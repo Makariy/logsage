@@ -5,8 +5,7 @@ import "github.com/shopspring/decimal"
 type CategoryStats struct {
 	Category Category `json:"category"`
 
-	TotalAmount  decimal.Decimal `json:"totalAmount"`
-	TotalPercent decimal.Decimal `json:"totalPercent"`
+	TotalAmount decimal.Decimal `json:"totalAmount"`
 
 	Transactions []*Transaction `json:"transactions"`
 }
@@ -14,10 +13,8 @@ type CategoryStats struct {
 type AccountStats struct {
 	Account Account `json:"account"`
 
-	TotalEarnedAmount  decimal.Decimal `json:"totalEarnedAmount"`
-	TotalEarnedPercent decimal.Decimal `json:"totalEarnedPercent"`
-	TotalSpentAmount   decimal.Decimal `json:"totalSpentAmount"`
-	TotalSpentPercent  decimal.Decimal `json:"totalSpentPercent"`
+	TotalEarnedAmount decimal.Decimal `json:"totalEarnedAmount"`
+	TotalSpentAmount  decimal.Decimal `json:"totalSpentAmount"`
 
 	Transactions []*Transaction `json:"transactions"`
 }

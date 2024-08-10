@@ -12,6 +12,10 @@ type DateTimeRange struct {
 	ToDate   time.Time `json:"toDate" form:"toDate"`
 }
 
+type RelativeCurrency struct {
+	Symbol string `json:"currency" form:"currency"`
+}
+
 func (dateRange *DateRange) ToDateTimeRange() *DateTimeRange {
 	return &DateTimeRange{
 		FromDate: time.Unix(dateRange.FromDate, 0),

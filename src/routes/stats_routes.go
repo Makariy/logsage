@@ -14,12 +14,19 @@ func AddStatsRoutes(router *gin.Engine) {
 	group := router.Group("/stats")
 	group.Use(middleware.LoginRequired)
 
-	group.GET("/category/all/", middleware.AttachDateRange, handleGetTotalCategoriesStats)
+	group.GET(
+		"/category/all/",
+		middleware.AttachRelativeCurrency,
+		middleware.AttachDateRange,
+		handleGetTotalCategoriesStats,
+	)
 	group.GET("/account/all/", middleware.AttachDateRange, handleGetTotalAccountsStats)
 	group.GET("/category/:id/",
+		middleware.AttachRelativeCurrency,
 		middleware.AttachDateRange,
 		middleware.AttachUserAndModel[models.Category](),
-		handleGetCategoryStats)
+		handleGetCategoryStats,
+	)
 	group.GET("/account/:id/",
 		middleware.AttachDateRange,
 		middleware.AttachUserAndModel[models.Account](),
@@ -39,7 +46,20 @@ func handleGetCategoryStats(ctx *gin.Context) {
 		return
 	}
 
-	stats, err := repository.GetCategoryStats(category.ID, dateRange.FromDate, dateRange.ToDate)
+	relativeCurrency, exists := middleware.GetFromContext[*models.Currency](
+		ctx, middleware.RelativeCurrencyKey,
+	)
+	if !exists {
+		ctx.AbortWithStatus(500)
+		return
+	}
+
+	stats, err := repository.GetCategoryStats(
+		category.ID,
+		dateRange.FromDate,
+		dateRange.ToDate,
+		relativeCurrency,
+	)
 	if err != nil {
 		ctx.AbortWithStatus(500)
 		return
@@ -103,7 +123,20 @@ func handleGetTotalCategoriesStats(ctx *gin.Context) {
 		return
 	}
 
-	stats, err := repository.GetTotalCategoriesStats(user.ID, dateRange.FromDate, dateRange.ToDate)
+	relativeCurrency, exists := middleware.GetFromContext[*models.Currency](
+		ctx, middleware.RelativeCurrencyKey,
+	)
+	if !exists {
+		ctx.AbortWithStatus(500)
+		return
+	}
+
+	stats, err := repository.GetTotalCategoriesStats(
+		user.ID,
+		dateRange.FromDate,
+		dateRange.ToDate,
+		relativeCurrency,
+	)
 	if err != nil {
 		ctx.AbortWithStatus(500)
 		return

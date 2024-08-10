@@ -10,10 +10,11 @@ import (
 )
 
 const (
-	UserKey      = "user"
-	ModelKey     = "model"
-	ModelIdKey   = "modelId"
-	DateRangeKey = "dateRange"
+	UserKey             = "user"
+	ModelKey            = "model"
+	ModelIdKey          = "modelId"
+	DateRangeKey        = "dateRange"
+	RelativeCurrencyKey = "relativeCurrency"
 )
 
 func AttachUser(ctx *gin.Context) {
@@ -63,7 +64,7 @@ func AttachDateRange(ctx *gin.Context) {
 		})
 		return
 	}
-	if dateForm.ToDate-dateForm.FromDate < 0 {
+	if dateForm.ToDate-dateForm.FromDate <= 0 {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, forms.ErrorResponse{
 			Status: "Bad request",
 			Error:  "Invalid date range",
@@ -72,4 +73,26 @@ func AttachDateRange(ctx *gin.Context) {
 	}
 
 	ctx.Set(DateRangeKey, dateForm.ToDateTimeRange())
+}
+
+func AttachRelativeCurrency(ctx *gin.Context) {
+	relativeCurrency, err := utils.ShouldGetQuery[forms.RelativeCurrency](ctx)
+	if err != nil || relativeCurrency.Symbol == "" {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, forms.ErrorResponse{
+			Status: "Bad request",
+			Error:  "Invalid relative currency",
+		})
+		return
+	}
+
+	currency, err := repository.GetCurrencyBySymbol(relativeCurrency.Symbol)
+	if err != nil || currency == nil {
+		ctx.AbortWithStatusJSON(http.StatusNotFound, forms.ErrorResponse{
+			Status: "Bad request",
+			Error:  "Could not find relative currency",
+		})
+		return
+	}
+
+	ctx.Set(RelativeCurrencyKey, currency)
 }
