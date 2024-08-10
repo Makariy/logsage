@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/net/context"
+	"main/utils"
 	"os"
 	"time"
 )
@@ -17,7 +18,11 @@ var (
 var conn *redis.Client
 
 func getConnection() *redis.Client {
-	fmt.Println("Connecting to redis: ", RedisHost+":"+RedisPort)
+	utils.CheckEnvNotEmpty(map[string]string{
+		"host": RedisHost,
+		"port": RedisPort,
+	}, "Redis connection env %s is empty")
+
 	ctx, _ := GetContext()
 	client := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", RedisHost, RedisPort),
