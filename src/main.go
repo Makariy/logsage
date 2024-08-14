@@ -10,12 +10,7 @@ import (
 func main() {
 	router := gin.Default()
 
-	routes.AddAuthRoutes(router)
-	routes.AddAccountRoutes(router)
-	routes.AddCurrencyRoutes(router)
-	routes.AddCategoryRoutes(router)
-	routes.AddStatsRoutes(router)
-	routes.AddTransactionRoutes(router)
+	routes.SetupAllRoutes(router)
 
 	err := router.Run("localhost:8000")
 	if err != nil {

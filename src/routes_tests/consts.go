@@ -1,52 +1,32 @@
 package routes_tests
 
 import (
-	"github.com/shopspring/decimal"
 	"main/forms"
-	"main/models"
-	"time"
-)
-
-var (
-	userEmail    = "test@test.com"
-	userPassword = "testpassword"
-
-	accountName    = "KuCoin"
-	accountBalance = decimal.NewFromInt(1000)
-
-	currencyName   = "Dollar"
-	currencySymbol = "USD"
-
-	categoryName = "Test category"
-	categoryType = models.SPENDING
-
-	transactionDescription = "Test transaction"
-	transactionAmount      = decimal.NewFromInt(200)
-	transactionDate        = time.Now()
+	data "main/test_utils/test_data"
 )
 
 var (
 	currencyResponse = forms.CurrencyResponse{
 		ID:     1,
-		Name:   currencyName,
-		Symbol: currencySymbol,
+		Name:   data.FirstCurrencySymbol,
+		Symbol: data.FirstCurrencySymbol,
 	}
 	categoryResponse = forms.CategoryResponse{
 		ID:   1,
-		Name: categoryName,
-		Type: categoryType,
+		Name: data.FirstCategoryName,
+		Type: data.FirstCategoryType,
 	}
 	accountResponse = forms.AccountResponse{
 		ID:       1,
-		Name:     accountName,
-		Balance:  accountBalance,
+		Name:     data.FirstAccountName,
+		Balance:  data.FirstAccountBalance,
 		Currency: &currencyResponse,
 	}
 	transactionResponse = forms.TransactionResponse{
 		ID:          1,
-		Description: transactionDescription,
-		Amount:      transactionAmount,
-		Date:        transactionDate,
+		Description: data.TransactionDescription,
+		Amount:      data.TransactionAmount,
+		Date:        data.TransactionDate,
 		Category:    categoryResponse,
 		Account:     accountResponse,
 	}

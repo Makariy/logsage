@@ -5,12 +5,13 @@ import (
 	"github.com/stretchr/testify/suite"
 	"main/models"
 	"main/repository"
+	"main/test_utils"
 	"time"
 )
 
 type StatsRepositorySuit struct {
 	suite.Suite
-	base DefaultRepositorySuite
+	base test_utils.RepositoryDefaultSuite
 }
 
 var (
@@ -19,7 +20,8 @@ var (
 )
 
 func (suite *StatsRepositorySuit) SetupTest() {
-	suite.base.SetupTest()
+	suite.base.SetupDB()
+	suite.base.SetupAllTestData()
 }
 
 func (suite *StatsRepositorySuit) TearDownTest() {
@@ -28,19 +30,19 @@ func (suite *StatsRepositorySuit) TearDownTest() {
 
 func (suite *StatsRepositorySuit) TestGetCategoryStats() {
 	categoryStats, err := repository.GetCategoryStats(
-		suite.base.firstCategory.ID,
+		suite.base.FirstCategory.ID,
 		fromDate,
 		toDate,
-		suite.base.firstCurrency,
+		suite.base.FirstCurrency,
 	)
 	suite.True(err == nil)
 
 	expected := models.CategoryStats{
-		Category:    *suite.base.firstCategory,
+		Category:    *suite.base.FirstCategory,
 		TotalAmount: transaction1Amount.Add(transaction2Amount),
 		Transactions: []*models.Transaction{
-			suite.base.transaction1,
-			suite.base.transaction2,
+			suite.base.Transaction1,
+			suite.base.Transaction2,
 		},
 	}
 
@@ -49,19 +51,19 @@ func (suite *StatsRepositorySuit) TestGetCategoryStats() {
 
 func (suite *StatsRepositorySuit) TestGetAccountStats() {
 	accountStats, err := repository.GetAccountStats(
-		suite.base.firstAccount.ID,
+		suite.base.FirstAccount.ID,
 		fromDate,
 		toDate,
 	)
 	suite.True(err == nil)
 
 	expected := models.AccountStats{
-		Account:           *suite.base.firstAccount,
+		Account:           *suite.base.FirstAccount,
 		TotalSpentAmount:  transaction1Amount.Add(transaction2Amount),
 		TotalEarnedAmount: decimal.Zero,
 		Transactions: []*models.Transaction{
-			suite.base.transaction1,
-			suite.base.transaction2,
+			suite.base.Transaction1,
+			suite.base.Transaction2,
 		},
 	}
 
@@ -69,7 +71,7 @@ func (suite *StatsRepositorySuit) TestGetAccountStats() {
 }
 
 func (suite *StatsRepositorySuit) TestGetTotalAccountsStats() {
-	totalStats, err := repository.GetTotalAccountsStats(suite.base.user.ID, fromDate, toDate)
+	totalStats, err := repository.GetTotalAccountsStats(suite.base.User.ID, fromDate, toDate)
 	suite.True(err == nil)
 
 	expectedSpentAmount := transaction1Amount.Add(transaction2Amount)
@@ -78,22 +80,22 @@ func (suite *StatsRepositorySuit) TestGetTotalAccountsStats() {
 		Mul(secondCurrencyValue)
 
 	firstAccountStats := models.AccountStats{
-		Account:           *suite.base.firstAccount,
+		Account:           *suite.base.FirstAccount,
 		TotalSpentAmount:  expectedSpentAmount,
 		TotalEarnedAmount: decimal.Zero,
 		Transactions: []*models.Transaction{
-			suite.base.transaction1,
-			suite.base.transaction2,
+			suite.base.Transaction1,
+			suite.base.Transaction2,
 		},
 	}
 
 	secondAccountStats := models.AccountStats{
-		Account:           *suite.base.secondAccount,
+		Account:           *suite.base.SecondAccount,
 		TotalSpentAmount:  decimal.Zero,
 		TotalEarnedAmount: expectedEarnedAmount,
 		Transactions: []*models.Transaction{
-			suite.base.transaction3,
-			suite.base.transaction4,
+			suite.base.Transaction3,
+			suite.base.Transaction4,
 		},
 	}
 
@@ -111,10 +113,10 @@ func (suite *StatsRepositorySuit) TestGetTotalAccountsStats() {
 
 func (suite *StatsRepositorySuit) TestGetTotalCategoriesStats() {
 	totalStats, err := repository.GetTotalCategoriesStats(
-		suite.base.user.ID,
+		suite.base.User.ID,
 		fromDate,
 		toDate,
-		suite.base.firstCurrency,
+		suite.base.FirstCurrency,
 	)
 	suite.True(err == nil)
 
@@ -124,19 +126,19 @@ func (suite *StatsRepositorySuit) TestGetTotalCategoriesStats() {
 		Mul(secondCurrencyValue)
 
 	firstCategoryStats := models.CategoryStats{
-		Category:    *suite.base.firstCategory,
+		Category:    *suite.base.FirstCategory,
 		TotalAmount: expectedSpentAmount,
 		Transactions: []*models.Transaction{
-			suite.base.transaction1,
-			suite.base.transaction2,
+			suite.base.Transaction1,
+			suite.base.Transaction2,
 		},
 	}
 	secondCategoryStats := models.CategoryStats{
-		Category:    *suite.base.secondCategory,
+		Category:    *suite.base.SecondCategory,
 		TotalAmount: expectedEarnedAmount,
 		Transactions: []*models.Transaction{
-			suite.base.transaction3,
-			suite.base.transaction4,
+			suite.base.Transaction3,
+			suite.base.Transaction4,
 		},
 	}
 

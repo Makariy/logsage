@@ -3,7 +3,6 @@ package routes_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
 	"main/db_connector"
 	"main/forms"
@@ -11,36 +10,40 @@ import (
 	"main/repository"
 	"main/routes"
 	"main/test_utils"
+	data "main/test_utils/test_data"
 )
 
 type UserRoutesSuit struct {
 	suite.Suite
-	router *gin.Engine
+	router test_utils.RoutesDefaultSuite
 }
 
 func (suite *UserRoutesSuit) SetupTest() {
-	test_utils.CreateTestDB()
-	models.MigrateModels(db_connector.GetConnection())
-
-	suite.router = gin.Default()
-	routes.AddAuthRoutes(suite.router)
+	suite.router.SetupBase()
+	routes.AddAuthRoutes(suite.router.Router)
 }
 
 func (suite *UserRoutesSuit) TearDownTest() {
-	test_utils.DropTestDB()
+	suite.router.TearDownTest()
 }
 
 func getLoginForm() []byte {
 	form := &forms.UserForm{
-		Email:    userEmail,
-		Password: userPassword,
+		Email:    data.UserEmail,
+		Password: data.UserPassword,
 	}
 	stringForm, _ := json.Marshal(&form)
 	return stringForm
 }
 
 func (suite *UserRoutesSuit) TestHandleSignup() {
-	resp := PerformTestRequest(suite.router, "POST", "/auth/signup/", getLoginForm(), nil)
+	resp := PerformTestRequest(
+		suite.router.Router,
+		"POST",
+		"/auth/signup/",
+		getLoginForm(),
+		nil,
+	)
 	AssertResponseSuccess(201, resp, &suite.Suite)
 	suite.NotNil(resp.Header().Get("Authorization"), "No authorization token provided in response")
 
@@ -54,14 +57,30 @@ func (suite *UserRoutesSuit) TestHandleSignup() {
 	suite.Equal(1, len(users), "Created an unexpected amount of users")
 
 	user := users[0]
-	suite.Equal(userEmail, user.Email, "Signed up with different email")
+	suite.Equal(
+		data.UserEmail,
+		user.Email,
+		"Signed up with different email",
+	)
 }
 
 func (suite *UserRoutesSuit) TestHandleSignupEmailExists() {
-	resp := PerformTestRequest(suite.router, "POST", "/auth/signup/", getLoginForm(), nil)
+	resp := PerformTestRequest(
+		suite.router.Router,
+		"POST",
+		"/auth/signup/",
+		getLoginForm(),
+		nil,
+	)
 	AssertResponseSuccess(201, resp, &suite.Suite)
 
-	resp = PerformTestRequest(suite.router, "POST", "/auth/signup/", getLoginForm(), nil)
+	resp = PerformTestRequest(
+		suite.router.Router,
+		"POST",
+		"/auth/signup/",
+		getLoginForm(),
+		nil,
+	)
 	suite.Equal(400, resp.Code)
 	suite.Equal("", resp.Header().Get("Authorization"))
 
@@ -75,23 +94,47 @@ func (suite *UserRoutesSuit) TestHandleSignupEmailExists() {
 }
 
 func (suite *UserRoutesSuit) TestHandleLogin() {
-	_, err := repository.CreateUser(userEmail, userPassword)
+	_, err := repository.CreateUser(
+		data.UserEmail,
+		data.UserPassword,
+	)
 	suite.Equal(err, nil, "Got an unexpected error creating user")
 
-	resp := PerformTestRequest(suite.router, "POST", "/auth/login/", getLoginForm(), nil)
+	resp := PerformTestRequest(
+		suite.router.Router,
+		"POST",
+		"/auth/login/",
+		getLoginForm(),
+		nil,
+	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
 }
 
 func (suite *UserRoutesSuit) TestHandleLogout() {
-	_, err := repository.CreateUser(userEmail, userPassword)
+	_, err := repository.CreateUser(
+		data.UserEmail,
+		data.UserPassword,
+	)
 	suite.Equal(err, nil, "Got an unexpected error creating user")
 
-	resp := PerformTestRequest(suite.router, "POST", "/auth/login/", getLoginForm(), nil)
+	resp := PerformTestRequest(
+		suite.router.Router,
+		"POST",
+		"/auth/login/",
+		getLoginForm(),
+		nil,
+	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
 
 	headers := map[string]string{
 		"Authorization": resp.Header().Get("Authorization"),
 	}
-	resp = PerformTestRequest(suite.router, "POST", "/auth/logout/", nil, &headers)
+	resp = PerformTestRequest(
+		suite.router.Router,
+		"POST",
+		"/auth/logout/",
+		nil,
+		&headers,
+	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
 }

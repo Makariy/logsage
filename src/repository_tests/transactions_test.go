@@ -5,20 +5,21 @@ import (
 	"github.com/stretchr/testify/suite"
 	"main/models"
 	"main/repository"
+	"main/test_utils"
 	"time"
 )
 
 type TransactionRepositorySuit struct {
 	suite.Suite
-	base DefaultRepositorySuite
+	base test_utils.RepositoryDefaultSuite
 }
 
 func (suite *TransactionRepositorySuit) SetupTest() {
-	suite.base.setupDB()
-	suite.base.createDefaultUser()
-	suite.base.createDefaultCurrencies()
-	suite.base.createDefaultCategories()
-	suite.base.createDefaultAccounts()
+	suite.base.SetupDB()
+	suite.base.CreateDefaultUser()
+	suite.base.CreateDefaultCurrencies()
+	suite.base.CreateDefaultCategories()
+	suite.base.CreateDefaultAccounts()
 }
 
 func (suite *TransactionRepositorySuit) TearDownTest() {
@@ -30,9 +31,9 @@ func (suite *TransactionRepositorySuit) TestCreateTransaction() {
 		transactionDescription,
 		transactionAmount,
 		transactionDate,
-		suite.base.user.ID,
-		suite.base.firstCategory.ID,
-		suite.base.firstAccount.ID,
+		suite.base.User.ID,
+		suite.base.FirstCategory.ID,
+		suite.base.FirstAccount.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -43,9 +44,9 @@ func (suite *TransactionRepositorySuit) TestCreateTransaction() {
 		Description: transactionDescription,
 		Amount:      transactionAmount,
 		Date:        transactionDate,
-		User:        *suite.base.user,
-		Category:    *suite.base.firstCategory,
-		Account:     *suite.base.firstAccount,
+		User:        *suite.base.User,
+		Category:    *suite.base.FirstCategory,
+		Account:     *suite.base.FirstAccount,
 	}
 
 	TestTransactionsEqual(&expected, transaction, &suite.Suite)
@@ -56,9 +57,9 @@ func (suite *TransactionRepositorySuit) TestGetTransactionByID() {
 		transactionDescription,
 		transactionAmount,
 		transactionDate,
-		suite.base.user.ID,
-		suite.base.firstCategory.ID,
-		suite.base.firstAccount.ID,
+		suite.base.User.ID,
+		suite.base.FirstCategory.ID,
+		suite.base.FirstAccount.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -87,9 +88,9 @@ func (suite *TransactionRepositorySuit) TestGetAllTransactions() {
 		transactionDescription,
 		transactionAmount,
 		transactionDate,
-		suite.base.user.ID,
-		suite.base.firstCategory.ID,
-		suite.base.firstAccount.ID,
+		suite.base.User.ID,
+		suite.base.FirstCategory.ID,
+		suite.base.FirstAccount.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -98,22 +99,22 @@ func (suite *TransactionRepositorySuit) TestGetAllTransactions() {
 		"Other transaction",
 		decimal.NewFromInt(500),
 		time.Now(),
-		suite.base.user.ID,
-		suite.base.firstCategory.ID,
-		suite.base.firstAccount.ID,
+		suite.base.User.ID,
+		suite.base.FirstCategory.ID,
+		suite.base.FirstAccount.ID,
 	)
 	if err != nil {
 		suite.Error(err)
 	}
 
-	transactions, err := repository.GetUserTransactions(suite.base.user.ID)
+	transactions, err := repository.GetUserTransactions(suite.base.User.ID)
 	if err != nil {
 		suite.Error(err)
 	}
 	suite.Equal(2, len(transactions))
 
 	for _, transaction := range transactions {
-		TestUsersEqual(suite.base.user, &transaction.User, &suite.Suite)
+		TestUsersEqual(suite.base.User, &transaction.User, &suite.Suite)
 	}
 
 	isFirstFirst := transactions[0].ID == first.ID
@@ -131,9 +132,9 @@ func (suite *TransactionRepositorySuit) TestPatchTransaction() {
 		transactionDescription,
 		transactionAmount,
 		transactionDate,
-		suite.base.user.ID,
-		suite.base.firstCategory.ID,
-		suite.base.firstAccount.ID,
+		suite.base.User.ID,
+		suite.base.FirstCategory.ID,
+		suite.base.FirstAccount.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -150,9 +151,9 @@ func (suite *TransactionRepositorySuit) TestPatchTransaction() {
 		newDescription,
 		newAmount,
 		newDate,
-		suite.base.user.ID,
-		suite.base.firstCategory.ID,
-		suite.base.firstAccount.ID,
+		suite.base.User.ID,
+		suite.base.FirstCategory.ID,
+		suite.base.FirstAccount.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -176,9 +177,9 @@ func (suite *TransactionRepositorySuit) TestDeleteTransaction() {
 		transactionDescription,
 		transactionAmount,
 		transactionDate,
-		suite.base.user.ID,
-		suite.base.firstCategory.ID,
-		suite.base.firstAccount.ID,
+		suite.base.User.ID,
+		suite.base.FirstCategory.ID,
+		suite.base.FirstAccount.ID,
 	)
 	if err != nil {
 		suite.Error(err)

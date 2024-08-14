@@ -1,28 +1,24 @@
 package routes_tests
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
-	"main/db_connector"
 	"main/forms"
 	"main/models"
 	"main/repository"
 	"main/routes"
 	"main/test_utils"
+	data "main/test_utils/test_data"
 	"main/utils"
 )
 
 type CurrencyRoutesSuit struct {
 	suite.Suite
-	router *gin.Engine
+	router test_utils.RoutesDefaultSuite
 }
 
 func (suite *CurrencyRoutesSuit) SetupTest() {
-	test_utils.CreateTestDB()
-	models.MigrateModels(db_connector.GetConnection())
-
-	suite.router = gin.Default()
-	routes.AddCurrencyRoutes(suite.router)
+	suite.router.SetupBase()
+	routes.AddCurrencyRoutes(suite.router.Router)
 }
 
 func (suite *CurrencyRoutesSuit) TearDownTest() {
@@ -30,12 +26,22 @@ func (suite *CurrencyRoutesSuit) TearDownTest() {
 }
 
 func (suite *CurrencyRoutesSuit) TestHandleGetAllCurrencies() {
-	currency, err := repository.CreateCurrency(currencyName, currencySymbol)
+	currency, err := repository.CreateCurrency(
+		"Test currency",
+		data.FirstCurrencySymbol,
+		data.FirstCurrencyValue,
+	)
 	if err != nil {
 		suite.Error(err)
 	}
 
-	resp := PerformTestRequest(suite.router, "GET", "/currency/all/", nil, nil)
+	resp := PerformTestRequest(
+		suite.router.Router,
+		"GET",
+		"/currency/all/",
+		nil,
+		nil,
+	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
 
 	response, err := UnmarshalResponse[forms.CurrenciesResponse](resp)
@@ -45,7 +51,9 @@ func (suite *CurrencyRoutesSuit) TestHandleGetAllCurrencies() {
 
 	suite.Equal(1, len(response.Currencies))
 
-	expectedForm, err := utils.MarshalModelToForm[models.Currency, forms.CurrencyResponse](currency)
+	expectedForm, err := utils.MarshalModelToForm[models.Currency, forms.CurrencyResponse](
+		currency,
+	)
 	if err != nil {
 		suite.Error(err)
 	}

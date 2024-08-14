@@ -3,44 +3,35 @@ package routes_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
-	"main/db_connector"
 	"main/forms"
 	"main/models"
-	"main/repository"
 	"main/routes"
 	"main/test_utils"
+	data "main/test_utils/test_data"
 	"main/utils"
 )
 
 type CategoryRoutesSuit struct {
 	suite.Suite
-	router *gin.Engine
-
-	user        *models.User
-	authHeaders map[string]string
+	router test_utils.RoutesDefaultSuite
 }
 
 func (suite *CategoryRoutesSuit) SetupTest() {
-	test_utils.CreateTestDB()
-	models.MigrateModels(db_connector.GetConnection())
-
-	suite.user = CreateTestUser(userEmail, userPassword)
-	suite.authHeaders = GetAuthHeaders(suite.user)
-
-	suite.router = gin.Default()
-	routes.AddCategoryRoutes(suite.router)
+	suite.router.SetupBase()
+	suite.router.Data.CreateDefaultUser()
+	suite.router.SetupAuth()
+	routes.AddCategoryRoutes(suite.router.Router)
 }
 
 func (suite *CategoryRoutesSuit) TearDownTest() {
-	test_utils.DropTestDB()
+	suite.router.TearDownTest()
 }
 
 func getCategoryForm() []byte {
 	form := &forms.CategoryForm{
-		Name: categoryName,
-		Type: categoryType,
+		Name: data.FirstCategoryName,
+		Type: data.FirstCategoryType,
 	}
 	stringForm, _ := json.Marshal(&form)
 	return stringForm
@@ -48,11 +39,11 @@ func getCategoryForm() []byte {
 
 func (suite *CategoryRoutesSuit) TestHandleCreateCategory() {
 	resp := PerformTestRequest(
-		suite.router,
+		suite.router.Router,
 		"POST",
 		"/category/create/",
 		getCategoryForm(),
-		&suite.authHeaders,
+		&suite.router.AuthHeaders,
 	)
 	AssertResponseSuccess(201, resp, &suite.Suite)
 
@@ -65,17 +56,15 @@ func (suite *CategoryRoutesSuit) TestHandleCreateCategory() {
 }
 
 func (suite *CategoryRoutesSuit) TestHandleGetCategory() {
-	category, err := repository.CreateCategory(suite.user.ID, categoryName, categoryType)
-	if err != nil {
-		suite.Error(err)
-	}
+	suite.router.Data.CreateDefaultCategories()
+	category := suite.router.Data.FirstCategory
 
 	resp := PerformTestRequest(
-		suite.router,
+		suite.router.Router,
 		"GET",
 		fmt.Sprintf("/category/get/%d/", category.ID),
 		nil,
-		&suite.authHeaders,
+		&suite.router.AuthHeaders,
 	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
 
@@ -93,22 +82,16 @@ func (suite *CategoryRoutesSuit) TestHandleGetCategory() {
 }
 
 func (suite *CategoryRoutesSuit) TestHandleGetAllCategories() {
-	first, err := repository.CreateCategory(suite.user.ID, categoryName, categoryType)
-	if err != nil {
-		suite.Error(err)
-	}
-
-	second, err := repository.CreateCategory(suite.user.ID, "Another Category", models.EARNING)
-	if err != nil {
-		suite.Error(err)
-	}
+	suite.router.Data.CreateDefaultCategories()
+	firstCategory := suite.router.Data.FirstCategory
+	secondCategory := suite.router.Data.SecondCategory
 
 	resp := PerformTestRequest(
-		suite.router,
+		suite.router.Router,
 		"GET",
 		"/category/all/",
 		getCategoryForm(),
-		&suite.authHeaders,
+		&suite.router.AuthHeaders,
 	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
 
@@ -119,11 +102,15 @@ func (suite *CategoryRoutesSuit) TestHandleGetAllCategories() {
 
 	suite.Equal(2, len(response.Categories))
 
-	firstForm, err := utils.MarshalModelToForm[models.Category, forms.CategoryResponse](first)
+	firstForm, err := utils.MarshalModelToForm[models.Category, forms.CategoryResponse](
+		firstCategory,
+	)
 	if err != nil {
 		suite.Error(err)
 	}
-	secondForm, err := utils.MarshalModelToForm[models.Category, forms.CategoryResponse](second)
+	secondForm, err := utils.MarshalModelToForm[models.Category, forms.CategoryResponse](
+		secondCategory,
+	)
 	if err != nil {
 		suite.Error(err)
 	}
@@ -137,11 +124,8 @@ func (suite *CategoryRoutesSuit) TestHandlePatchCategory() {
 		newName = "New category name"
 		newType = models.SPENDING
 	)
-
-	category, err := repository.CreateCategory(suite.user.ID, categoryName, categoryType)
-	if err != nil {
-		suite.Error(err)
-	}
+	suite.router.Data.CreateDefaultCategories()
+	category := suite.router.Data.FirstCategory
 
 	patchedCategory := forms.CategoryForm{
 		Name: newName,
@@ -149,11 +133,11 @@ func (suite *CategoryRoutesSuit) TestHandlePatchCategory() {
 	}
 	stringPatch, _ := json.Marshal(&patchedCategory)
 	resp := PerformTestRequest(
-		suite.router,
+		suite.router.Router,
 		"PATCH",
 		fmt.Sprintf("/category/patch/%d/", category.ID),
 		stringPatch,
-		&suite.authHeaders,
+		&suite.router.AuthHeaders,
 	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
 
@@ -166,7 +150,7 @@ func (suite *CategoryRoutesSuit) TestHandlePatchCategory() {
 		ID:   1,
 		Name: newName,
 		Type: newType,
-		User: *suite.user,
+		User: *suite.router.Data.User,
 	}
 	expectedForm, err := utils.MarshalModelToForm[models.Category, forms.CategoryResponse](&expectedCategory)
 	if err != nil {
@@ -176,17 +160,15 @@ func (suite *CategoryRoutesSuit) TestHandlePatchCategory() {
 }
 
 func (suite *CategoryRoutesSuit) TestHandleDeleteCategory() {
-	category, err := repository.CreateCategory(suite.user.ID, categoryName, categoryType)
-	if err != nil {
-		suite.Error(err)
-	}
+	suite.router.Data.CreateDefaultCategories()
+	category := suite.router.Data.FirstCategory
 
 	resp := PerformTestRequest(
-		suite.router,
+		suite.router.Router,
 		"DELETE",
 		fmt.Sprintf("/category/delete/%d/", category.ID),
 		getCategoryForm(),
-		&suite.authHeaders,
+		&suite.router.AuthHeaders,
 	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
 

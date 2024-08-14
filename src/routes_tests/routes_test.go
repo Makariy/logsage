@@ -16,7 +16,6 @@ func TestAccountRoutesSuite(t *testing.T) {
 func TestCategoryRoutesSuite(t *testing.T) {
 	suite.Run(t, new(CategoryRoutesSuit))
 }
-
 func TestCurrencyRoutesSuite(t *testing.T) {
 	suite.Run(t, new(CurrencyRoutesSuit))
 }

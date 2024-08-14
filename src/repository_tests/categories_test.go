@@ -4,16 +4,17 @@ import (
 	"github.com/stretchr/testify/suite"
 	"main/models"
 	"main/repository"
+	"main/test_utils"
 )
 
 type CategoryRepositorySuit struct {
 	suite.Suite
-	base DefaultRepositorySuite
+	base test_utils.RepositoryDefaultSuite
 }
 
 func (suite *CategoryRepositorySuit) SetupTest() {
-	suite.base.setupDB()
-	suite.base.createDefaultUser()
+	suite.base.SetupDB()
+	suite.base.CreateDefaultUser()
 }
 
 func (suite *CategoryRepositorySuit) TearDownTest() {
@@ -21,7 +22,7 @@ func (suite *CategoryRepositorySuit) TearDownTest() {
 }
 
 func (suite *CategoryRepositorySuit) TestCreateCategory() {
-	category, err := repository.CreateCategory(suite.base.user.ID, categoryName, categoryType)
+	category, err := repository.CreateCategory(suite.base.User.ID, categoryName, categoryType)
 	if err != nil {
 		suite.Error(err)
 	}
@@ -30,13 +31,13 @@ func (suite *CategoryRepositorySuit) TestCreateCategory() {
 		ID:   1,
 		Name: categoryName,
 		Type: categoryType,
-		User: *suite.base.user,
+		User: *suite.base.User,
 	}
 	TestCategoriesEqual(&expected, category, &suite.Suite)
 }
 
 func (suite *CategoryRepositorySuit) TestGetCategoryByID() {
-	category, err := repository.CreateCategory(suite.base.user.ID, categoryName, categoryType)
+	category, err := repository.CreateCategory(suite.base.User.ID, categoryName, categoryType)
 	if err != nil {
 		suite.Error(err)
 	}
@@ -50,23 +51,23 @@ func (suite *CategoryRepositorySuit) TestGetCategoryByID() {
 }
 
 func (suite *CategoryRepositorySuit) TestGetAllCategories() {
-	first, err := repository.CreateCategory(suite.base.user.ID, categoryName, categoryType)
+	first, err := repository.CreateCategory(suite.base.User.ID, categoryName, categoryType)
 	if err != nil {
 		suite.Error(err)
 	}
-	second, err := repository.CreateCategory(suite.base.user.ID, "Other category", models.EARNING)
+	second, err := repository.CreateCategory(suite.base.User.ID, "Other category", models.EARNING)
 	if err != nil {
 		suite.Error(err)
 	}
 
-	categories, err := repository.GetUserCategories(suite.base.user.ID)
+	categories, err := repository.GetUserCategories(suite.base.User.ID)
 	if err != nil {
 		suite.Error(err)
 	}
 	suite.Equal(2, len(categories))
 
 	for _, category := range categories {
-		TestUsersEqual(suite.base.user, &category.User, &suite.Suite)
+		TestUsersEqual(suite.base.User, &category.User, &suite.Suite)
 	}
 
 	isFirstFirst := categories[0].ID == first.ID
@@ -80,7 +81,7 @@ func (suite *CategoryRepositorySuit) TestGetAllCategories() {
 }
 
 func (suite *CategoryRepositorySuit) TestPatchCategory() {
-	category, err := repository.CreateCategory(suite.base.user.ID, categoryName, categoryType)
+	category, err := repository.CreateCategory(suite.base.User.ID, categoryName, categoryType)
 	if err != nil {
 		suite.Error(err)
 	}
@@ -90,7 +91,7 @@ func (suite *CategoryRepositorySuit) TestPatchCategory() {
 		newType = "New type"
 	)
 
-	patched, err := repository.PatchCategory(category.ID, newName, newType, suite.base.user.ID)
+	patched, err := repository.PatchCategory(category.ID, newName, newType, suite.base.User.ID)
 	if err != nil {
 		suite.Error(err)
 	}
@@ -106,7 +107,7 @@ func (suite *CategoryRepositorySuit) TestPatchCategory() {
 }
 
 func (suite *CategoryRepositorySuit) TestDeleteCategory() {
-	category, err := repository.CreateCategory(suite.base.user.ID, categoryName, categoryType)
+	category, err := repository.CreateCategory(suite.base.User.ID, categoryName, categoryType)
 	if err != nil {
 		suite.Error(err)
 	}

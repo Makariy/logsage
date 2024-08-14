@@ -3,47 +3,38 @@ package routes_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/suite"
-	"main/db_connector"
 	"main/forms"
 	"main/models"
 	"main/routes"
 	"main/test_utils"
+	data "main/test_utils/test_data"
 	"main/utils"
 )
 
 type AccountRoutesSuit struct {
 	suite.Suite
-	router *gin.Engine
-
-	user        *models.User
-	currency    *models.Currency
-	authHeaders map[string]string
+	router test_utils.RoutesDefaultSuite
 }
 
 func (suite *AccountRoutesSuit) SetupTest() {
-	test_utils.CreateTestDB()
-	models.MigrateModels(db_connector.GetConnection())
-
-	suite.user = CreateTestUser(userEmail, userPassword)
-	suite.currency = CreateTestCurrency(currencyName, currencySymbol)
-	suite.authHeaders = GetAuthHeaders(suite.user)
-
-	suite.router = gin.Default()
-	routes.AddAccountRoutes(suite.router)
+	suite.router.SetupBase()
+	suite.router.Data.CreateDefaultUser()
+	suite.router.SetupAuth()
+	suite.router.Data.CreateDefaultCurrencies()
+	routes.AddAccountRoutes(suite.router.Router)
 }
 
 func (suite *AccountRoutesSuit) TearDownTest() {
-	test_utils.DropTestDB()
+	suite.router.TearDownTest()
 }
 
 func getAccountForm(suite *AccountRoutesSuit) []byte {
 	form := &forms.AccountForm{
-		Name:       accountName,
-		Balance:    accountBalance,
-		CurrencyID: suite.currency.ID,
+		Name:       data.FirstAccountName,
+		Balance:    data.FirstAccountBalance,
+		CurrencyID: suite.router.Data.FirstCurrency.ID,
 	}
 	stringForm, _ := json.Marshal(&form)
 	return stringForm
@@ -51,11 +42,11 @@ func getAccountForm(suite *AccountRoutesSuit) []byte {
 
 func (suite *AccountRoutesSuit) TestHandleCreateAccount() {
 	resp := PerformTestRequest(
-		suite.router,
+		suite.router.Router,
 		"POST",
 		"/account/create/",
 		getAccountForm(suite),
-		&suite.authHeaders,
+		&suite.router.AuthHeaders,
 	)
 	AssertResponseSuccess(201, resp, &suite.Suite)
 
@@ -68,14 +59,16 @@ func (suite *AccountRoutesSuit) TestHandleCreateAccount() {
 }
 
 func (suite *AccountRoutesSuit) TestHandleGetAccount() {
-	account := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
+	suite.router.Data.CreateDefaultAccounts()
+
+	account := suite.router.Data.FirstAccount
 
 	resp := PerformTestRequest(
-		suite.router,
+		suite.router.Router,
 		"GET",
 		fmt.Sprintf("/account/get/%d/", account.ID),
 		nil,
-		&suite.authHeaders,
+		&suite.router.AuthHeaders,
 	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
 
@@ -84,7 +77,9 @@ func (suite *AccountRoutesSuit) TestHandleGetAccount() {
 		suite.Error(err)
 	}
 
-	expected, err := utils.MarshalModelToForm[models.Account, forms.AccountResponse](account)
+	expected, err := utils.MarshalModelToForm[models.Account, forms.AccountResponse](
+		account,
+	)
 	if err != nil {
 		suite.Error(err)
 	}
@@ -93,15 +88,16 @@ func (suite *AccountRoutesSuit) TestHandleGetAccount() {
 }
 
 func (suite *AccountRoutesSuit) TestHandleGetAllAccounts() {
-	first := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
-	second := CreateTestAccount("Another account", decimal.NewFromInt(20), suite.user.ID, suite.currency.ID)
+	suite.router.Data.CreateDefaultAccounts()
+	firstAccount := suite.router.Data.FirstAccount
+	secondAccount := suite.router.Data.SecondAccount
 
 	resp := PerformTestRequest(
-		suite.router,
+		suite.router.Router,
 		"GET",
 		"/account/all/",
 		getAccountForm(suite),
-		&suite.authHeaders,
+		&suite.router.AuthHeaders,
 	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
 
@@ -112,11 +108,15 @@ func (suite *AccountRoutesSuit) TestHandleGetAllAccounts() {
 
 	suite.Equal(2, len(response.Accounts))
 
-	firstForm, err := utils.MarshalModelToForm[models.Account, forms.AccountResponse](first)
+	firstForm, err := utils.MarshalModelToForm[models.Account, forms.AccountResponse](
+		firstAccount,
+	)
 	if err != nil {
 		suite.Error(err)
 	}
-	secondForm, err := utils.MarshalModelToForm[models.Account, forms.AccountResponse](second)
+	secondForm, err := utils.MarshalModelToForm[models.Account, forms.AccountResponse](
+		secondAccount,
+	)
 	if err != nil {
 		suite.Error(err)
 	}
@@ -129,10 +129,12 @@ func (suite *AccountRoutesSuit) TestHandlePatchAccount() {
 	var (
 		newName     = "New account name"
 		newBalance  = decimal.NewFromInt(20)
-		newCurrency = suite.currency
+		newCurrency = suite.router.Data.FirstCurrency
 	)
 
-	account := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
+	suite.router.Data.CreateDefaultAccounts()
+	account := suite.router.Data.FirstAccount
+
 	patchedAccount := forms.AccountForm{
 		Name:       newName,
 		Balance:    newBalance,
@@ -140,11 +142,11 @@ func (suite *AccountRoutesSuit) TestHandlePatchAccount() {
 	}
 	stringPatch, _ := json.Marshal(&patchedAccount)
 	resp := PerformTestRequest(
-		suite.router,
+		suite.router.Router,
 		"PATCH",
 		fmt.Sprintf("/account/patch/%d/", account.ID),
 		stringPatch,
-		&suite.authHeaders,
+		&suite.router.AuthHeaders,
 	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
 
@@ -158,7 +160,7 @@ func (suite *AccountRoutesSuit) TestHandlePatchAccount() {
 		Name:     newName,
 		Balance:  newBalance,
 		Currency: *newCurrency,
-		User:     *suite.user,
+		User:     *suite.router.Data.User,
 	}
 	expectedForm, err := utils.MarshalModelToForm[models.Account, forms.AccountResponse](&expectedAccount)
 	if err != nil {
@@ -168,14 +170,15 @@ func (suite *AccountRoutesSuit) TestHandlePatchAccount() {
 }
 
 func (suite *AccountRoutesSuit) TestHandleDeleteAccount() {
-	account := CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
+	suite.router.Data.CreateDefaultAccounts()
+	account := suite.router.Data.FirstAccount
 
 	resp := PerformTestRequest(
-		suite.router,
+		suite.router.Router,
 		"DELETE",
 		fmt.Sprintf("/account/delete/%d/", account.ID),
 		getAccountForm(suite),
-		&suite.authHeaders,
+		&suite.router.AuthHeaders,
 	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
 
@@ -184,7 +187,9 @@ func (suite *AccountRoutesSuit) TestHandleDeleteAccount() {
 		suite.Error(err)
 	}
 
-	expectedForm, err := utils.MarshalModelToForm[models.Account, forms.AccountResponse](account)
+	expectedForm, err := utils.MarshalModelToForm[models.Account, forms.AccountResponse](
+		account,
+	)
 	if err != nil {
 		suite.Error(err)
 	}

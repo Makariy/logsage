@@ -1,7 +1,8 @@
-package repository_tests
+package test_utils
 
 import (
 	"github.com/shopspring/decimal"
+	"main/auth"
 	"main/models"
 	"main/repository"
 )
@@ -41,4 +42,17 @@ func CreateTestAccount(name string, balance decimal.Decimal, userID, currencyID 
 		panic("could not create account")
 	}
 	return account
+}
+
+func GetAuthHeaders(user *models.User) map[string]string {
+	headers := make(map[string]string)
+
+	token := auth.CreateAuthToken()
+	err := auth.SetUserByToken(user, token)
+	if err != nil {
+		panic("Could not create auth token")
+	}
+
+	headers["Authorization"] = auth.RenderAuthorizationHeader(token)
+	return headers
 }

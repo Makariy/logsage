@@ -5,17 +5,18 @@ import (
 	"github.com/stretchr/testify/suite"
 	"main/models"
 	"main/repository"
+	"main/test_utils"
 )
 
 type AccountRepositorySuit struct {
 	suite.Suite
-	base DefaultRepositorySuite
+	base test_utils.RepositoryDefaultSuite
 }
 
 func (suite *AccountRepositorySuit) SetupTest() {
-	suite.base.setupDB()
-	suite.base.createDefaultUser()
-	suite.base.createDefaultCurrencies()
+	suite.base.SetupDB()
+	suite.base.CreateDefaultUser()
+	suite.base.CreateDefaultCurrencies()
 }
 
 func (suite *AccountRepositorySuit) TearDownTest() {
@@ -23,19 +24,19 @@ func (suite *AccountRepositorySuit) TearDownTest() {
 }
 
 func (suite *AccountRepositorySuit) TestCreateAccount() {
-	account := CreateTestAccount(
+	account := test_utils.CreateTestAccount(
 		accountName,
 		accountBalance,
-		suite.base.user.ID,
-		suite.base.firstCurrency.ID,
+		suite.base.User.ID,
+		suite.base.FirstCurrency.ID,
 	)
 
 	expected := models.Account{
 		ID:       1,
 		Name:     accountName,
 		Balance:  accountBalance,
-		Currency: *suite.base.firstCurrency,
-		User:     *suite.base.user,
+		Currency: *suite.base.FirstCurrency,
+		User:     *suite.base.User,
 	}
 
 	TestAccountsEqual(&expected, account, &suite.Suite)
@@ -46,18 +47,18 @@ func (suite *AccountRepositorySuit) TestPatchAccount() {
 		newAccountName = "New test account name"
 		newBalance     = decimal.NewFromInt(2000)
 	)
-	account := CreateTestAccount(
+	account := test_utils.CreateTestAccount(
 		accountName,
 		accountBalance,
-		suite.base.user.ID,
-		suite.base.firstCurrency.ID,
+		suite.base.User.ID,
+		suite.base.FirstCurrency.ID,
 	)
 	patched, err := repository.PatchAccount(
 		account.ID,
 		newAccountName,
 		newBalance,
 		account.CurrencyID,
-		suite.base.user.ID,
+		suite.base.User.ID,
 	)
 	if err != nil {
 		suite.Error(err)
@@ -67,14 +68,14 @@ func (suite *AccountRepositorySuit) TestPatchAccount() {
 		ID:       account.ID,
 		Name:     newAccountName,
 		Balance:  newBalance,
-		Currency: *suite.base.firstCurrency,
-		User:     *suite.base.user,
+		Currency: *suite.base.FirstCurrency,
+		User:     *suite.base.User,
 	}
 	TestAccountsEqual(&expected, patched, &suite.Suite)
 }
 
 func (suite *AccountRepositorySuit) TestGetAccountByID() {
-	account := CreateTestAccount(accountName, accountBalance, suite.base.user.ID, suite.base.firstCurrency.ID)
+	account := test_utils.CreateTestAccount(accountName, accountBalance, suite.base.User.ID, suite.base.FirstCurrency.ID)
 
 	foundAccount, err := repository.GetAccountByID(account.ID)
 	if err != nil {
@@ -87,18 +88,18 @@ func (suite *AccountRepositorySuit) TestGetAccountByID() {
 func (suite *AccountRepositorySuit) TestGetUserAccounts() {
 	secondBalance := decimal.NewFromInt(200)
 
-	first := CreateTestAccount(accountName, accountBalance, suite.base.user.ID, suite.base.firstCurrency.ID)
+	first := test_utils.CreateTestAccount(accountName, accountBalance, suite.base.User.ID, suite.base.FirstCurrency.ID)
 	second, err := repository.CreateAccount(
-		suite.base.user.ID,
+		suite.base.User.ID,
 		"Second account",
 		secondBalance,
-		suite.base.firstCurrency.ID,
+		suite.base.FirstCurrency.ID,
 	)
 	if err != nil {
 		suite.Error(err)
 	}
 
-	accounts, err := repository.GetUserAccounts(suite.base.user.ID)
+	accounts, err := repository.GetUserAccounts(suite.base.User.ID)
 	if err != nil {
 		suite.Error(err)
 	}
@@ -106,7 +107,7 @@ func (suite *AccountRepositorySuit) TestGetUserAccounts() {
 	suite.Equal(len(accounts), 2)
 
 	for _, account := range accounts {
-		TestUsersEqual(suite.base.user, &account.User, &suite.Suite)
+		TestUsersEqual(suite.base.User, &account.User, &suite.Suite)
 	}
 
 	isFirstFirst := accounts[0].ID == first.ID
@@ -120,7 +121,7 @@ func (suite *AccountRepositorySuit) TestGetUserAccounts() {
 }
 
 func (suite *AccountRepositorySuit) TestDeleteAccount() {
-	account := CreateTestAccount(accountName, accountBalance, suite.base.user.ID, suite.base.firstCurrency.ID)
+	account := test_utils.CreateTestAccount(accountName, accountBalance, suite.base.User.ID, suite.base.FirstCurrency.ID)
 
 	result, err := repository.DeleteAccount(account.ID)
 	if err != nil {

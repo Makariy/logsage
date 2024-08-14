@@ -3,57 +3,42 @@ package routes_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/suite"
-	"main/db_connector"
 	"main/forms"
 	"main/models"
-	"main/repository"
-	"main/routes"
 	"main/test_utils"
+	data "main/test_utils/test_data"
 	"main/utils"
-	"net/url"
-	"strconv"
 	"time"
 )
 
 type TransactionRoutesSuit struct {
 	suite.Suite
-	router *gin.Engine
-
-	user        *models.User
-	currency    *models.Currency
-	category    *models.Category
-	account     *models.Account
-	authHeaders map[string]string
+	router test_utils.RoutesDefaultSuite
 }
 
 func (suite *TransactionRoutesSuit) SetupTest() {
-	test_utils.CreateTestDB()
-	models.MigrateModels(db_connector.GetConnection())
-
-	suite.user = CreateTestUser(userEmail, userPassword)
-	suite.currency = CreateTestCurrency(currencyName, currencySymbol)
-	suite.category = CreateTestCategory(categoryName, categoryType, suite.user.ID)
-	suite.account = CreateTestAccount(accountName, accountBalance, suite.user.ID, suite.currency.ID)
-	suite.authHeaders = GetAuthHeaders(suite.user)
-
-	suite.router = gin.Default()
-	routes.AddTransactionRoutes(suite.router)
+	suite.router.SetupBase()
+	suite.router.Data.CreateDefaultUser()
+	suite.router.SetupAuth()
+	suite.router.SetupRoutes()
+	suite.router.Data.CreateDefaultCurrencies()
+	suite.router.Data.CreateDefaultAccounts()
+	suite.router.Data.CreateDefaultCategories()
 }
 
 func (suite *TransactionRoutesSuit) TearDownTest() {
-	test_utils.DropTestDB()
+	suite.router.TearDownTest()
 }
 
 func getTransactionForm(suite *TransactionRoutesSuit) []byte {
 	form := &forms.TransactionForm{
-		Description: transactionDescription,
-		Amount:      transactionAmount,
-		Date:        transactionDate,
-		CategoryID:  suite.category.ID,
-		AccountID:   suite.account.ID,
+		Description: data.TransactionDescription,
+		Amount:      data.TransactionAmount,
+		Date:        data.TransactionDate,
+		CategoryID:  suite.router.Data.FirstCategory.ID,
+		AccountID:   suite.router.Data.FirstAccount.ID,
 	}
 	stringForm, _ := json.Marshal(&form)
 	return stringForm
@@ -61,11 +46,11 @@ func getTransactionForm(suite *TransactionRoutesSuit) []byte {
 
 func (suite *TransactionRoutesSuit) TestHandleCreateTransaction() {
 	resp := PerformTestRequest(
-		suite.router,
+		suite.router.Router,
 		"POST",
 		"/transaction/create/",
 		getTransactionForm(suite),
-		&suite.authHeaders,
+		&suite.router.AuthHeaders,
 	)
 	AssertResponseSuccess(201, resp, &suite.Suite)
 
@@ -78,24 +63,15 @@ func (suite *TransactionRoutesSuit) TestHandleCreateTransaction() {
 }
 
 func (suite *TransactionRoutesSuit) TestHandleGetTransaction() {
-	transaction, err := repository.CreateTransaction(
-		transactionDescription,
-		transactionAmount,
-		transactionDate,
-		suite.user.ID,
-		suite.category.ID,
-		suite.account.ID,
-	)
-	if err != nil {
-		suite.Error(err)
-	}
+	suite.router.Data.CreateDefaultTransactions()
+	transaction := suite.router.Data.Transaction1
 
 	resp := PerformTestRequest(
-		suite.router,
+		suite.router.Router,
 		"GET",
 		fmt.Sprintf("/transaction/get/%d/", transaction.ID),
 		nil,
-		&suite.authHeaders,
+		&suite.router.AuthHeaders,
 	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
 
@@ -112,44 +88,20 @@ func (suite *TransactionRoutesSuit) TestHandleGetTransaction() {
 	TestTransactionsEqual(expected, response, &suite.Suite)
 }
 
-func getTransactionsDateRange() string {
-	params := url.Values{}
-	params.Add("fromDate", strconv.FormatInt(transactionDate.Unix()-1, 10))
-	params.Add("toDate", strconv.FormatInt(time.Now().Unix()+1, 10))
-	return params.Encode()
-}
-
 func (suite *TransactionRoutesSuit) TestHandleGetAllTransactions() {
-	first, err := repository.CreateTransaction(
-		transactionDescription,
-		transactionAmount,
-		transactionDate,
-		suite.user.ID,
-		suite.category.ID,
-		suite.account.ID,
-	)
-	if err != nil {
-		suite.Error(err)
-	}
-
-	second, err := repository.CreateTransaction(
-		"New description",
-		decimal.NewFromInt(21),
-		time.Now(),
-		suite.user.ID,
-		suite.category.ID,
-		suite.account.ID,
-	)
-	if err != nil {
-		suite.Error(err)
-	}
+	suite.router.Data.CreateDefaultTransactions()
+	firstTransaction := suite.router.Data.Transaction1
+	secondTransaction := suite.router.Data.Transaction2
 
 	resp := PerformTestRequest(
-		suite.router,
+		suite.router.Router,
 		"GET",
-		fmt.Sprintf("/transaction/all/?%s", getTransactionsDateRange()),
+		fmt.Sprintf(
+			"/transaction/all/?%s",
+			renderDateRangeForTransactions(firstTransaction, secondTransaction),
+		),
 		getTransactionForm(suite),
-		&suite.authHeaders,
+		&suite.router.AuthHeaders,
 	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
 
@@ -160,11 +112,15 @@ func (suite *TransactionRoutesSuit) TestHandleGetAllTransactions() {
 
 	suite.Equal(2, len(response.Transactions))
 
-	firstForm, err := utils.MarshalModelToForm[models.Transaction, forms.TransactionResponse](first)
+	firstForm, err := utils.MarshalModelToForm[models.Transaction, forms.TransactionResponse](
+		firstTransaction,
+	)
 	if err != nil {
 		suite.Error(err)
 	}
-	secondForm, err := utils.MarshalModelToForm[models.Transaction, forms.TransactionResponse](second)
+	secondForm, err := utils.MarshalModelToForm[models.Transaction, forms.TransactionResponse](
+		secondTransaction,
+	)
 	if err != nil {
 		suite.Error(err)
 	}
@@ -180,17 +136,8 @@ func (suite *TransactionRoutesSuit) TestHandlePatchTransaction() {
 		newDate        = time.Now()
 	)
 
-	transaction, err := repository.CreateTransaction(
-		transactionDescription,
-		transactionAmount,
-		transactionDate,
-		suite.user.ID,
-		suite.category.ID,
-		suite.account.ID,
-	)
-	if err != nil {
-		suite.Error(err)
-	}
+	suite.router.Data.CreateDefaultTransactions()
+	transaction := suite.router.Data.Transaction1
 
 	patchedTransaction := forms.TransactionForm{
 		Description: newDescription,
@@ -199,11 +146,11 @@ func (suite *TransactionRoutesSuit) TestHandlePatchTransaction() {
 	}
 	stringPatch, _ := json.Marshal(&patchedTransaction)
 	resp := PerformTestRequest(
-		suite.router,
+		suite.router.Router,
 		"PATCH",
 		fmt.Sprintf("/transaction/patch/%d/", transaction.ID),
 		stringPatch,
-		&suite.authHeaders,
+		&suite.router.AuthHeaders,
 	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
 
@@ -217,9 +164,9 @@ func (suite *TransactionRoutesSuit) TestHandlePatchTransaction() {
 		Description: newDescription,
 		Amount:      newAmount,
 		Date:        newDate,
-		User:        *suite.user,
-		Category:    *suite.category,
-		Account:     *suite.account,
+		User:        *suite.router.Data.User,
+		Category:    *suite.router.Data.FirstCategory,
+		Account:     *suite.router.Data.FirstAccount,
 	}
 	expectedForm, err := utils.MarshalModelToForm[models.Transaction, forms.TransactionResponse](&expectedTransaction)
 	if err != nil {
@@ -229,24 +176,15 @@ func (suite *TransactionRoutesSuit) TestHandlePatchTransaction() {
 }
 
 func (suite *TransactionRoutesSuit) TestHandleDeleteTransaction() {
-	transaction, err := repository.CreateTransaction(
-		transactionDescription,
-		transactionAmount,
-		transactionDate,
-		suite.user.ID,
-		suite.category.ID,
-		suite.account.ID,
-	)
-	if err != nil {
-		suite.Error(err)
-	}
+	suite.router.Data.CreateDefaultTransactions()
+	transaction := suite.router.Data.Transaction1
 
 	resp := PerformTestRequest(
-		suite.router,
+		suite.router.Router,
 		"DELETE",
 		fmt.Sprintf("/transaction/delete/%d/", transaction.ID),
 		getTransactionForm(suite),
-		&suite.authHeaders,
+		&suite.router.AuthHeaders,
 	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
 
