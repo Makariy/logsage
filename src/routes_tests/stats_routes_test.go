@@ -71,7 +71,7 @@ func (suite *StatsRoutesSuit) TestHandleGetCategoryStats() {
 			startTransaction,
 			stopTransaction,
 		),
-		Stats: models.CategoryStats{
+		Stats: forms.CategoryStats{
 			Category:    *suite.router.Data.FirstCategory,
 			TotalAmount: decimal.NewFromInt(300),
 			Transactions: []*models.Transaction{
@@ -120,7 +120,7 @@ func (suite *StatsRoutesSuit) TestHandleGetAccountStats() {
 			startTransaction,
 			stopTransaction,
 		),
-		Stats: models.AccountStats{
+		Stats: forms.AccountStats{
 			Account:           *suite.router.Data.FirstAccount,
 			TotalSpentAmount:  decimal.NewFromInt(300),
 			TotalEarnedAmount: decimal.Zero,
@@ -161,10 +161,10 @@ func (suite *StatsRoutesSuit) TestHandleGetTotalAccountsStats() {
 			startTransaction,
 			stopTransaction,
 		),
-		Stats: models.TotalAccountsStats{
+		Stats: forms.TotalAccountsStats{
 			TotalSpentAmount:  decimal.NewFromInt(300),
 			TotalEarnedAmount: decimal.NewFromInt(7),
-			AccountsStats: []*models.AccountStats{
+			AccountsStats: []*forms.AccountStats{
 				{
 					Account:           *suite.router.Data.FirstAccount,
 					TotalEarnedAmount: decimal.Zero,
@@ -218,10 +218,10 @@ func (suite *StatsRoutesSuit) TestHandleGetTotalCategoriesStats() {
 			startTransaction,
 			stopTransaction,
 		),
-		Stats: models.TotalCategoriesStats{
+		Stats: forms.TotalCategoriesStats{
 			TotalEarnedAmount: decimal.NewFromInt(7),
 			TotalSpentAmount:  decimal.NewFromInt(300),
-			CategoriesStats: []*models.CategoryStats{
+			CategoriesStats: []*forms.CategoryStats{
 				{
 					Category:    *suite.router.Data.FirstCategory,
 					TotalAmount: decimal.NewFromInt(300),

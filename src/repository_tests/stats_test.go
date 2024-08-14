@@ -3,6 +3,7 @@ package repository_tests
 import (
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/suite"
+	"main/forms"
 	"main/models"
 	"main/repository"
 	"main/test_utils"
@@ -37,7 +38,7 @@ func (suite *StatsRepositorySuit) TestGetCategoryStats() {
 	)
 	suite.True(err == nil)
 
-	expected := models.CategoryStats{
+	expected := forms.CategoryStats{
 		Category:    *suite.base.FirstCategory,
 		TotalAmount: transaction1Amount.Add(transaction2Amount),
 		Transactions: []*models.Transaction{
@@ -57,7 +58,7 @@ func (suite *StatsRepositorySuit) TestGetAccountStats() {
 	)
 	suite.True(err == nil)
 
-	expected := models.AccountStats{
+	expected := forms.AccountStats{
 		Account:           *suite.base.FirstAccount,
 		TotalSpentAmount:  transaction1Amount.Add(transaction2Amount),
 		TotalEarnedAmount: decimal.Zero,
@@ -79,7 +80,7 @@ func (suite *StatsRepositorySuit) TestGetTotalAccountsStats() {
 		Add(transaction4Amount).
 		Mul(secondCurrencyValue)
 
-	firstAccountStats := models.AccountStats{
+	firstAccountStats := forms.AccountStats{
 		Account:           *suite.base.FirstAccount,
 		TotalSpentAmount:  expectedSpentAmount,
 		TotalEarnedAmount: decimal.Zero,
@@ -89,7 +90,7 @@ func (suite *StatsRepositorySuit) TestGetTotalAccountsStats() {
 		},
 	}
 
-	secondAccountStats := models.AccountStats{
+	secondAccountStats := forms.AccountStats{
 		Account:           *suite.base.SecondAccount,
 		TotalSpentAmount:  decimal.Zero,
 		TotalEarnedAmount: expectedEarnedAmount,
@@ -99,10 +100,10 @@ func (suite *StatsRepositorySuit) TestGetTotalAccountsStats() {
 		},
 	}
 
-	expected := models.TotalAccountsStats{
+	expected := forms.TotalAccountsStats{
 		TotalEarnedAmount: expectedEarnedAmount,
 		TotalSpentAmount:  expectedSpentAmount,
-		AccountsStats: []*models.AccountStats{
+		AccountsStats: []*forms.AccountStats{
 			&firstAccountStats,
 			&secondAccountStats,
 		},
@@ -125,7 +126,7 @@ func (suite *StatsRepositorySuit) TestGetTotalCategoriesStats() {
 		Add(transaction4Amount).
 		Mul(secondCurrencyValue)
 
-	firstCategoryStats := models.CategoryStats{
+	firstCategoryStats := forms.CategoryStats{
 		Category:    *suite.base.FirstCategory,
 		TotalAmount: expectedSpentAmount,
 		Transactions: []*models.Transaction{
@@ -133,7 +134,7 @@ func (suite *StatsRepositorySuit) TestGetTotalCategoriesStats() {
 			suite.base.Transaction2,
 		},
 	}
-	secondCategoryStats := models.CategoryStats{
+	secondCategoryStats := forms.CategoryStats{
 		Category:    *suite.base.SecondCategory,
 		TotalAmount: expectedEarnedAmount,
 		Transactions: []*models.Transaction{
@@ -142,10 +143,10 @@ func (suite *StatsRepositorySuit) TestGetTotalCategoriesStats() {
 		},
 	}
 
-	expected := models.TotalCategoriesStats{
+	expected := forms.TotalCategoriesStats{
 		TotalEarnedAmount: expectedEarnedAmount,
 		TotalSpentAmount:  expectedSpentAmount,
-		CategoriesStats: []*models.CategoryStats{
+		CategoriesStats: []*forms.CategoryStats{
 			&firstCategoryStats,
 			&secondCategoryStats,
 		},

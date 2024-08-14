@@ -4,6 +4,7 @@ import (
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 	"main/db_connector"
+	"main/forms"
 	"main/models"
 	"time"
 )
@@ -51,7 +52,7 @@ func GetCategoryStats(
 	fromDate,
 	toDate time.Time,
 	outputCurrency *models.Currency,
-) (*models.CategoryStats, error) {
+) (*forms.CategoryStats, error) {
 	db := db_connector.GetConnection()
 
 	category, err := GetCategoryByID(categoryID)
@@ -72,7 +73,7 @@ func GetCategoryStats(
 		return nil, err
 	}
 
-	stats := models.CategoryStats{
+	stats := forms.CategoryStats{
 		Category:     *category,
 		TotalAmount:  totalCategoryAmount.Div(outputCurrency.Value),
 		Transactions: transactions,
@@ -108,7 +109,7 @@ func GetAccountStats(
 	accountID models.ModelID,
 	fromDate,
 	toDate time.Time,
-) (*models.AccountStats, error) {
+) (*forms.AccountStats, error) {
 	db := db_connector.GetConnection()
 
 	account, err := GetAccountByID(accountID)
@@ -131,7 +132,7 @@ func GetAccountStats(
 		return nil, err
 	}
 
-	stats := models.AccountStats{
+	stats := forms.AccountStats{
 		Account:           *account,
 		TotalEarnedAmount: accountEarnedAmount,
 		TotalSpentAmount:  accountSpentAmount,
@@ -145,13 +146,13 @@ func GetAccountsStats(
 	userID models.ModelID,
 	fromDate,
 	toDate time.Time,
-) ([]*models.AccountStats, error) {
+) ([]*forms.AccountStats, error) {
 	accounts, err := GetUserAccounts(userID)
 	if err != nil {
 		return nil, err
 	}
 
-	accountsStats := make([]*models.AccountStats, 0, len(accounts))
+	accountsStats := make([]*forms.AccountStats, 0, len(accounts))
 	for _, account := range accounts {
 		accountStats, err := GetAccountStats(account.ID, fromDate, toDate)
 		if err != nil {
@@ -167,13 +168,13 @@ func GetCategoriesStats(
 	fromDate,
 	toDate time.Time,
 	outputCurrency *models.Currency,
-) ([]*models.CategoryStats, error) {
+) ([]*forms.CategoryStats, error) {
 	categories, err := GetUserCategories(userID)
 	if err != nil {
 		return nil, err
 	}
 
-	categoriesStats := make([]*models.CategoryStats, 0, len(categories))
+	categoriesStats := make([]*forms.CategoryStats, 0, len(categories))
 	for _, category := range categories {
 		categoryStats, err := GetCategoryStats(category.ID, fromDate, toDate, outputCurrency)
 		if err != nil {
@@ -190,7 +191,7 @@ func GetTotalCategoriesStats(
 	fromDate,
 	toDate time.Time,
 	outputCurrency *models.Currency,
-) (*models.TotalCategoriesStats, error) {
+) (*forms.TotalCategoriesStats, error) {
 	db := db_connector.GetConnection()
 
 	totalEarnedAmount, err := getTotalTransactedAmountByType(db, fromDate, toDate, models.EARNING)
@@ -207,7 +208,7 @@ func GetTotalCategoriesStats(
 		return nil, err
 	}
 
-	stats := models.TotalCategoriesStats{
+	stats := forms.TotalCategoriesStats{
 		TotalEarnedAmount: totalEarnedAmount.Div(outputCurrency.Value),
 		TotalSpentAmount:  totalSpentAmount.Div(outputCurrency.Value),
 		CategoriesStats:   categoriesStats,
@@ -219,7 +220,7 @@ func GetTotalAccountsStats(
 	userID models.ModelID,
 	fromDate,
 	toDate time.Time,
-) (*models.TotalAccountsStats, error) {
+) (*forms.TotalAccountsStats, error) {
 	db := db_connector.GetConnection()
 
 	totalEarnedAmount, err := getTotalTransactedAmountByType(db, fromDate, toDate, models.EARNING)
@@ -236,7 +237,7 @@ func GetTotalAccountsStats(
 		return nil, err
 	}
 
-	stats := models.TotalAccountsStats{
+	stats := forms.TotalAccountsStats{
 		TotalEarnedAmount: totalEarnedAmount,
 		TotalSpentAmount:  totalSpentAmount,
 		AccountsStats:     accountsStats,

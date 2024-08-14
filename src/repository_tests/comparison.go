@@ -3,6 +3,7 @@ package repository_tests
 import (
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/suite"
+	"main/forms"
 	"main/models"
 	"time"
 )
@@ -56,7 +57,7 @@ func TestTransactionsEqual(expected, actual *models.Transaction, suite *suite.Su
 	TestAccountsEqual(&expected.Account, &actual.Account, suite)
 }
 
-func TestCategoriesStatsEqual(expected, actual *models.CategoryStats, suite *suite.Suite) {
+func TestCategoriesStatsEqual(expected, actual *forms.CategoryStats, suite *suite.Suite) {
 	compareDecimal(suite, expected.TotalAmount, actual.TotalAmount)
 
 	TestCategoriesEqual(&expected.Category, &actual.Category, suite)
@@ -67,7 +68,7 @@ func TestCategoriesStatsEqual(expected, actual *models.CategoryStats, suite *sui
 	}
 }
 
-func TestAccountStatsEqual(expected, actual *models.AccountStats, suite *suite.Suite) {
+func TestAccountStatsEqual(expected, actual *forms.AccountStats, suite *suite.Suite) {
 	compareDecimal(suite, expected.TotalSpentAmount, actual.TotalSpentAmount)
 	compareDecimal(suite, expected.TotalEarnedAmount, actual.TotalEarnedAmount)
 
@@ -79,7 +80,7 @@ func TestAccountStatsEqual(expected, actual *models.AccountStats, suite *suite.S
 	}
 }
 
-func TestTotalCategoriesStatsEqual(expected, actual *models.TotalCategoriesStats, suite *suite.Suite) {
+func TestTotalCategoriesStatsEqual(expected, actual *forms.TotalCategoriesStats, suite *suite.Suite) {
 	compareDecimal(suite, expected.TotalEarnedAmount, actual.TotalEarnedAmount)
 	compareDecimal(suite, expected.TotalSpentAmount, actual.TotalSpentAmount)
 
@@ -89,7 +90,7 @@ func TestTotalCategoriesStatsEqual(expected, actual *models.TotalCategoriesStats
 	}
 }
 
-func TestTotalAccountsStatsEqual(expected, actual *models.TotalAccountsStats, suite *suite.Suite) {
+func TestTotalAccountsStatsEqual(expected, actual *forms.TotalAccountsStats, suite *suite.Suite) {
 	compareDecimal(
 		suite,
 		expected.TotalEarnedAmount,
