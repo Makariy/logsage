@@ -4,7 +4,11 @@ import (
 	"main/models"
 )
 
-func CreateCategory(userID models.ModelID, name string, categoryType string) (*models.Category, error) {
+func CreateCategory(
+	userID models.ModelID,
+	name string,
+	categoryType models.CategoryType,
+) (*models.Category, error) {
 	category := models.Category{
 		Name:   name,
 		Type:   categoryType,
@@ -21,7 +25,12 @@ func GetUserCategories(userID models.ModelID) ([]*models.Category, error) {
 	return GetUserModels[models.Category](userID)
 }
 
-func PatchCategory(categoryID models.ModelID, name string, categoryType string, userID models.ModelID) (*models.Category, error) {
+func PatchCategory(
+	categoryID models.ModelID,
+	name string,
+	categoryType models.CategoryType,
+	userID models.ModelID,
+) (*models.Category, error) {
 	category := models.Category{
 		ID:     categoryID,
 		Name:   name,

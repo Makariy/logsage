@@ -1,16 +1,18 @@
 package models
 
+type CategoryType string
+
 const (
-	SPENDING = "SPENDING"
-	EARNING  = "EARNING"
+	SPENDING CategoryType = "SPENDING"
+	EARNING  CategoryType = "EARNING"
 )
 
 type Category struct {
-	ID     ModelID `gorm:"column:id;primaryKey;unique;autoIncrement"`
-	Name   string  `gorm:"column:name;unique"`
-	Type   string  `gorm:"column:type"`
-	UserID ModelID `gorm:"column:user_id"`
-	User   User    `gorm:"foreignKey:UserID"`
+	ID     ModelID      `gorm:"column:id;primaryKey;unique;autoIncrement"`
+	Name   string       `gorm:"column:name;unique"`
+	Type   CategoryType `gorm:"column:type"`
+	UserID ModelID      `gorm:"column:user_id"`
+	User   User         `gorm:"foreignKey:UserID"`
 }
 
 func (Category) TableName() string {
