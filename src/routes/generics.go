@@ -110,7 +110,7 @@ func handlePatchModel[Model models.UserGettable, Form any, ResponseForm any](
 			return
 		}
 
-		itemID, exists := middleware.GetFromContext[*models.ModelID](ctx, middleware.ModelIdKey)
+		itemID, exists := middleware.ShouldGetFromContext[*models.ModelID](ctx, middleware.ModelIdKey)
 		if !exists {
 			ctx.AbortWithStatus(500)
 			return
@@ -142,7 +142,7 @@ func handleGetUserModel[Model any, ResponseForm any](
 	getUserModel func(id models.ModelID) (*Model, error),
 ) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
-		modelID, exists := middleware.GetFromContext[*models.ModelID](ctx, middleware.ModelIdKey)
+		modelID, exists := middleware.ShouldGetFromContext[*models.ModelID](ctx, middleware.ModelIdKey)
 		if !exists {
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, forms.ErrorResponse{
 				Status: "Bad Request",
@@ -170,7 +170,7 @@ func handleGetUserModel[Model any, ResponseForm any](
 }
 
 func handleModelFromContext[Model any, ResponseForm any](ctx *gin.Context) {
-	model, exists := middleware.GetFromContext[*Model](ctx, middleware.ModelKey)
+	model, exists := middleware.ShouldGetFromContext[*Model](ctx, middleware.ModelKey)
 	if !exists {
 		return
 	}
@@ -211,7 +211,7 @@ func handleDeleteModel[Model any, ItemResponse any](
 	deleteModel func(id models.ModelID) (*Model, error),
 ) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
-		itemID, exists := middleware.GetFromContext[*models.ModelID](ctx, middleware.ModelIdKey)
+		itemID, exists := middleware.ShouldGetFromContext[*models.ModelID](ctx, middleware.ModelIdKey)
 		if !exists {
 			ctx.AbortWithStatus(500)
 			return

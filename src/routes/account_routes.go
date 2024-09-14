@@ -19,16 +19,16 @@ func AddAccountRoutes(router *gin.Engine) {
 		),
 	)
 	group.GET("/get/:id/",
-		middleware.AttachUserAndModel[models.Account](),
+		middleware.AttachUserAndModelByDefaultKeys[models.Account](),
 		handleGetUserModel[models.Account, forms.AccountResponse](repository.GetModelByID[models.Account]))
 	group.POST("/create/",
 		handleCreateUserModel[models.Account, forms.AccountForm, forms.AccountResponse](
 			utils.ShouldGetForm[forms.AccountForm], repository.CreateModel[models.Account]))
 	group.PATCH("/patch/:id/",
-		middleware.AttachUserAndModel[models.Account](),
+		middleware.AttachUserAndModelByDefaultKeys[models.Account](),
 		handlePatchModel[models.Account, forms.AccountForm, forms.AccountResponse](
 			utils.ShouldGetForm[forms.AccountForm], repository.PatchModel[models.Account]))
 	group.DELETE("/delete/:id/",
-		middleware.AttachUserAndModel[models.Account](),
+		middleware.AttachUserAndModelByDefaultKeys[models.Account](),
 		handleDeleteModel[models.Account, forms.AccountResponse](repository.DeleteModel[models.Account]))
 }

@@ -16,11 +16,11 @@ func AddTransactionRoutes(router *gin.Engine) {
 
 	group.GET(
 		"/all/",
-		middleware.AttachDateRange,
+		middleware.AttachDateRangeByDefaultKeys(),
 		handleGetTransactions,
 	)
 	group.GET("/get/:id/",
-		middleware.AttachUserAndModel[models.Transaction](),
+		middleware.AttachUserAndModelByDefaultKeys[models.Transaction](),
 		handleGetUserModel[models.Transaction, forms.TransactionResponse](
 			repository.GetTransactionByID,
 		),
@@ -31,13 +31,13 @@ func AddTransactionRoutes(router *gin.Engine) {
 		),
 	)
 	group.PATCH("/patch/:id/",
-		middleware.AttachUserAndModel[models.Transaction](),
+		middleware.AttachUserAndModelByDefaultKeys[models.Transaction](),
 		handlePatchModel[models.Transaction, forms.TransactionForm, forms.TransactionResponse](
 			utils.ShouldGetForm[forms.TransactionForm], repository.PatchTransactionFromModel,
 		),
 	)
 	group.DELETE("/delete/:id/",
-		middleware.AttachUserAndModel[models.Transaction](),
+		middleware.AttachUserAndModelByDefaultKeys[models.Transaction](),
 		handleDeleteModel[models.Transaction, forms.TransactionResponse](
 			repository.DeleteTransaction,
 		),
@@ -45,7 +45,7 @@ func AddTransactionRoutes(router *gin.Engine) {
 }
 
 func handleGetTransactions(ctx *gin.Context) {
-	dateRange, exists := middleware.GetFromContext[*forms.DateTimeRange](ctx, middleware.DateRangeKey)
+	dateRange, exists := middleware.ShouldGetFromContext[*forms.DateTimeRange](ctx, middleware.DateRangeKey)
 	if !exists {
 		return
 	}

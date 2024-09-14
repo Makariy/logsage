@@ -16,43 +16,36 @@ func AddStatsRoutes(router *gin.Engine) {
 
 	group.GET(
 		"/category/all/",
-		middleware.AttachRelativeCurrency,
-		middleware.AttachDateRange,
-		handleGetTotalCategoriesStats,
-	)
-	group.GET("/account/all/", middleware.AttachDateRange, handleGetTotalAccountsStats)
+		middleware.AttachRelativeCurrencyByDefaultKeys(),
+		middleware.AttachDateRangeByDefaultKeys(),
+		handleGetTotalCategoriesStats)
+	group.GET(
+		"/account/all/",
+		middleware.AttachDateRangeByDefaultKeys(),
+		handleGetTotalAccountsStats)
 	group.GET("/category/:id/",
-		middleware.AttachRelativeCurrency,
-		middleware.AttachDateRange,
-		middleware.AttachUserAndModel[models.Category](),
-		handleGetCategoryStats,
-	)
+		middleware.AttachRelativeCurrencyByDefaultKeys(),
+		middleware.AttachDateRangeByDefaultKeys(),
+		middleware.AttachUserAndModelByDefaultKeys[models.Category](),
+		handleGetCategoryStats)
 	group.GET("/account/:id/",
-		middleware.AttachDateRange,
-		middleware.AttachUserAndModel[models.Account](),
+		middleware.AttachDateRangeByDefaultKeys(),
+		middleware.AttachUserAndModelByDefaultKeys[models.Account](),
 		handleGetAccountStats)
+	group.GET("/interval/",
+		middleware.AttachRelativeCurrencyByDefaultKeys(),
+		middleware.AttachDateRangeByDefaultKeys(),
+		middleware.AttachTimeIntervalByDefaultKeys(),
+		handleGetTimeIntervalStats)
 }
 
 func handleGetCategoryStats(ctx *gin.Context) {
-	category, exists := middleware.GetFromContext[*models.Category](ctx, middleware.ModelKey)
-	if !exists {
-		ctx.AbortWithStatus(500)
-		return
-	}
-
-	dateRange, exists := middleware.GetFromContext[*forms.DateTimeRange](ctx, middleware.DateRangeKey)
-	if !exists {
-		ctx.AbortWithStatus(500)
-		return
-	}
-
-	relativeCurrency, exists := middleware.GetFromContext[*models.Currency](
-		ctx, middleware.RelativeCurrencyKey,
+	category := middleware.GetFromContext[models.Category](ctx, middleware.ModelKey)
+	relativeCurrency := middleware.GetFromContext[models.Currency](
+		ctx,
+		middleware.RelativeCurrencyKey,
 	)
-	if !exists {
-		ctx.AbortWithStatus(500)
-		return
-	}
+	dateRange := middleware.GetDateRangeFromContext(ctx)
 
 	stats, err := repository.GetCategoryStats(
 		category.ID,
@@ -78,17 +71,8 @@ func handleGetCategoryStats(ctx *gin.Context) {
 }
 
 func handleGetAccountStats(ctx *gin.Context) {
-	account, exists := middleware.GetFromContext[*models.Account](ctx, middleware.ModelKey)
-	if !exists {
-		ctx.AbortWithStatus(500)
-		return
-	}
-
-	dateRange, exists := middleware.GetFromContext[*forms.DateTimeRange](ctx, middleware.DateRangeKey)
-	if !exists {
-		ctx.AbortWithStatus(500)
-		return
-	}
+	account := middleware.GetFromContext[models.Account](ctx, middleware.ModelKey)
+	dateRange := middleware.GetDateRangeFromContext(ctx)
 
 	stats, err := repository.GetAccountStats(account.ID, dateRange.FromDate, dateRange.ToDate)
 	if err != nil {
@@ -111,25 +95,13 @@ func handleGetAccountStats(ctx *gin.Context) {
 }
 
 func handleGetTotalCategoriesStats(ctx *gin.Context) {
-	user, err := middleware.GetUserFromRequest(ctx)
-	if err != nil {
-		ctx.AbortWithStatus(500)
-		return
-	}
+	user, _ := middleware.GetUserFromRequest(ctx)
+	dateRange := middleware.GetDateRangeFromContext(ctx)
 
-	dateRange, exists := middleware.GetFromContext[*forms.DateTimeRange](ctx, middleware.DateRangeKey)
-	if !exists {
-		ctx.AbortWithStatus(500)
-		return
-	}
-
-	relativeCurrency, exists := middleware.GetFromContext[*models.Currency](
-		ctx, middleware.RelativeCurrencyKey,
+	relativeCurrency := middleware.GetFromContext[models.Currency](
+		ctx,
+		middleware.RelativeCurrencyKey,
 	)
-	if !exists {
-		ctx.AbortWithStatus(500)
-		return
-	}
 
 	stats, err := repository.GetTotalCategoriesStats(
 		user.ID,
@@ -150,17 +122,8 @@ func handleGetTotalCategoriesStats(ctx *gin.Context) {
 }
 
 func handleGetTotalAccountsStats(ctx *gin.Context) {
-	user, err := middleware.GetUserFromRequest(ctx)
-	if err != nil {
-		ctx.AbortWithStatus(500)
-		return
-	}
-
-	dateRange, exists := middleware.GetFromContext[*forms.DateTimeRange](ctx, middleware.DateRangeKey)
-	if !exists {
-		ctx.AbortWithStatus(500)
-		return
-	}
+	user, _ := middleware.GetUserFromRequest(ctx)
+	dateRange := middleware.GetDateRangeFromContext(ctx)
 
 	stats, err := repository.GetTotalAccountsStats(user.ID, dateRange.FromDate, dateRange.ToDate)
 	if err != nil {
@@ -169,6 +132,38 @@ func handleGetTotalAccountsStats(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, forms.TotalAccountsStatsResponse{
+		SuccessResponse: forms.Success,
+		DateRange:       dateRange.ToDateRange(),
+		Stats:           *stats,
+	})
+}
+
+func handleGetTimeIntervalStats(ctx *gin.Context) {
+	user, _ := middleware.GetUserFromRequest(ctx)
+	dateRange := middleware.GetDateRangeFromContext(ctx)
+	relativeCurrency := middleware.GetFromContext[models.Currency](
+		ctx, middleware.RelativeCurrencyKey,
+	)
+	timeInterval := middleware.GetFromContext[forms.TimeInterval](ctx, middleware.TimeIntervalKey)
+
+	stats, err := repository.GetTimeIntervalStats(
+		user.ID,
+		dateRange.FromDate,
+		dateRange.ToDate,
+		models.TimeIntervalStep(timeInterval.Interval),
+		relativeCurrency,
+	)
+	if err != nil {
+		ctx.AbortWithStatusJSON(
+			500,
+			forms.ErrorResponse{
+				Status: "error",
+				Error:  err.Error(),
+			},
+		)
+		return
+	}
+	ctx.JSON(http.StatusOK, forms.TimeIntervalStatsResponse{
 		SuccessResponse: forms.Success,
 		DateRange:       dateRange.ToDateRange(),
 		Stats:           *stats,

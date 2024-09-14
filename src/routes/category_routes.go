@@ -27,12 +27,12 @@ func AddCategoryRoutes(router *gin.Engine) {
 		),
 	)
 	group.GET("/get/:id/",
-		middleware.AttachUserAndModel[models.Category](),
+		middleware.AttachUserAndModelByDefaultKeys[models.Category](),
 		handleGetUserModel[models.Category, forms.CategoryResponse](repository.GetModelByID[models.Category]),
 	)
 	group.PATCH(
 		"/patch/:id/",
-		middleware.AttachUserAndModel[models.Category](),
+		middleware.AttachUserAndModelByDefaultKeys[models.Category](),
 		handlePatchModel[
 			models.Category,
 			forms.CategoryForm,
@@ -40,6 +40,6 @@ func AddCategoryRoutes(router *gin.Engine) {
 		](utils.ShouldGetForm[forms.CategoryForm], repository.PatchModel[models.Category]))
 	group.DELETE(
 		"/delete/:id/",
-		middleware.AttachUserAndModel[models.Category](),
+		middleware.AttachUserAndModelByDefaultKeys[models.Category](),
 		handleDeleteModel[models.Category, forms.CategoryResponse](repository.DeleteModel[models.Category]))
 }
