@@ -21,25 +21,49 @@ func GetUserByCredentials(email, password string) (*models.User, error) {
 	return user, nil
 }
 
-func RenderAuthorizationHeader(token models.AuthToken) string {
-	return fmt.Sprintf("Token %s", token)
+func RenderAuthorizationHeader(token *models.AuthToken) string {
+	return fmt.Sprintf("Token %s", *token)
 }
 
-func Authorize(context *gin.Context, user *models.User) (models.AuthToken, error) {
+func getOrCreateTokenForUser(user *models.User) (*models.AuthToken, error) {
+	_, err := GetUserByID(user.ID)
+	if err == nil {
+		return GetTokenByUserID(user.ID)
+	}
+
 	token := CreateAuthToken()
+	err = SetUserByToken(user, token)
+	if err != nil {
+		return nil, err
+	}
+	return token, nil
+}
+
+func Authorize(context *gin.Context, user *models.User) (*models.AuthToken, error) {
+	token, err := getOrCreateTokenForUser(user)
+	if err != nil {
+		_ = DelUser(user)
+		return nil, err
+	}
 	context.Header("Authorization", RenderAuthorizationHeader(token))
 
-	return token, SetUserByToken(user, token)
+	err = repository.UpdateLastLogin(user)
+	if err != nil {
+		_ = DelUser(user)
+		return nil, err
+	}
+
+	return token, err
 }
 
-func SignUpUser(context *gin.Context, email, pass string) (*models.User, models.AuthToken, error) {
+func SignUpUser(context *gin.Context, email, pass string) (*models.User, *models.AuthToken, error) {
 	user, err := repository.CreateUser(email, pass)
 	if err != nil {
-		return nil, "", err
+		return nil, nil, err
 	}
 	token, err := Authorize(context, user)
 	if err != nil {
-		return nil, "", err
+		return nil, nil, err
 	}
 	return user, token, nil
 }

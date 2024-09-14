@@ -23,7 +23,11 @@ func CreateTestCurrency(currencyName string, value decimal.Decimal) *models.Curr
 	return currency
 }
 
-func CreateTestCategory(userID models.ModelID, categoryName string, categoryType string) *models.Category {
+func CreateTestCategory(
+	userID models.ModelID,
+	categoryName string,
+	categoryType models.CategoryType,
+) *models.Category {
 	category, err := repository.CreateCategory(userID, categoryName, categoryType)
 	if err != nil {
 		panic("could not create test category")

@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"main/db_connector"
 	"main/models"
+	"time"
 )
 
 func HashPassword(password string) string {
@@ -33,6 +34,16 @@ func CreateUser(email, password string) (*models.User, error) {
 	}
 
 	return CreateModel(&user)
+}
+
+func UpdateLastLogin(user *models.User) error {
+	db := db_connector.GetConnection()
+
+	tx := db.Model(&models.User{}).
+		Where("id = ?", user.ID).
+		Update("last_login", time.Now())
+
+	return tx.Error
 }
 
 func DeleteUser(id models.ModelID) (*models.User, error) {

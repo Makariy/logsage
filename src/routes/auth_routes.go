@@ -20,7 +20,7 @@ func AddAuthRoutes(router *gin.Engine) {
 	group.GET("/me/", middleware.LoginRequired, handleMe)
 }
 
-func shouldSignUpUser(ctx *gin.Context, userForm *forms.UserForm) (*models.User, models.AuthToken, error) {
+func shouldSignUpUser(ctx *gin.Context, userForm *forms.UserForm) (*models.User, *models.AuthToken, error) {
 	user, token, err := auth.SignUpUser(ctx, userForm.Email, userForm.Password)
 	if err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
@@ -28,13 +28,13 @@ func shouldSignUpUser(ctx *gin.Context, userForm *forms.UserForm) (*models.User,
 				Status: "Bad request",
 				Error:  "A user with this email already exists",
 			})
-			return nil, "", err
+			return nil, nil, err
 		} else {
 			ctx.JSON(http.StatusBadRequest, forms.ErrorResponse{
 				Status: "Bad request",
 				Error:  "Cannot sign up",
 			})
-			return nil, "", err
+			return nil, nil, err
 		}
 	}
 	return user, token, nil
@@ -62,10 +62,11 @@ func handleLogin(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, forms.UserResponse{
-		SuccessResponse: forms.Success,
-		Email:           user.Email,
-		LastLogin:       user.LastLogin,
-		Token:           token,
+		SuccessResponse:  forms.Success,
+		Email:            user.Email,
+		LastLogin:        user.LastLogin,
+		RegistrationDate: user.RegistrationDate,
+		Token:            *token,
 	})
 }
 
@@ -81,10 +82,11 @@ func handleSignUp(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, forms.UserResponse{
-		SuccessResponse: forms.Success,
-		Email:           user.Email,
-		LastLogin:       user.LastLogin,
-		Token:           token,
+		SuccessResponse:  forms.Success,
+		Email:            user.Email,
+		LastLogin:        user.LastLogin,
+		RegistrationDate: user.RegistrationDate,
+		Token:            *token,
 	})
 }
 
@@ -105,8 +107,9 @@ func handleMe(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, forms.UserResponse{
-		SuccessResponse: forms.Success,
-		Email:           user.Email,
-		LastLogin:       user.LastLogin,
+		SuccessResponse:  forms.Success,
+		Email:            user.Email,
+		LastLogin:        user.LastLogin,
+		RegistrationDate: user.RegistrationDate,
 	})
 }

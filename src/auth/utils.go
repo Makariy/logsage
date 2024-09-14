@@ -16,16 +16,17 @@ var (
 	InvalidTokenFormatError = errors.New("invalid token format")
 )
 
-func CreateAuthToken() models.AuthToken {
-	token := make([]byte, 32)
-	_, err := rand.Read(token)
+func CreateAuthToken() *models.AuthToken {
+	rawToken := make([]byte, 32)
+	_, err := rand.Read(rawToken)
 	if err != nil {
 		panic(err)
 	}
-	return models.AuthToken(base64.URLEncoding.EncodeToString(token))
+	token := models.AuthToken(base64.URLEncoding.EncodeToString(rawToken))
+	return &token
 }
 
-func GetTokenFromRequest(context *gin.Context) ([]byte, error) {
+func GetTokenFromRequest(context *gin.Context) (*models.AuthToken, error) {
 	authorization := context.GetHeader("Authorization")
 	if len(authorization) == 0 {
 		return nil, NoAuthTokenError
@@ -35,5 +36,6 @@ func GetTokenFromRequest(context *gin.Context) ([]byte, error) {
 	if len(match) == 0 {
 		return nil, InvalidTokenFormatError
 	}
-	return []byte(match[1]), nil
+	token := models.AuthToken(match[1])
+	return &token, nil
 }

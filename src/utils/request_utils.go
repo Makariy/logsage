@@ -32,10 +32,10 @@ func ShouldGetQuery[T any](ctx *gin.Context) (*T, error) {
 	return form, nil
 }
 
-func ShouldParseID(ctx *gin.Context) (models.ModelID, error) {
-	strID := ctx.Param("id")
+func ShouldParseID(idKey string, ctx *gin.Context) (models.ModelID, error) {
+	strID := ctx.Param(idKey)
 	if strID == "" {
-		strID = ctx.Query("id")
+		strID = ctx.Query(idKey)
 	}
 	id, err := strconv.Atoi(strID)
 	if err != nil {
