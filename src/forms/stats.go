@@ -36,6 +36,18 @@ type TotalCategoriesStats struct {
 	CategoriesStats []*CategoryStats `json:"categoriesStats"`
 }
 
+type TimeIntervalStat struct {
+	TotalSpentAmount  decimal.Decimal `json:"totalSpentAmount"`
+	TotalEarnedAmount decimal.Decimal `json:"totalEarnedAmount"`
+	DateRange         *DateRange      `json:"dateRange"`
+}
+
+type TimeIntervalStats struct {
+	IntervalStats []*TimeIntervalStat `json:"intervalStats"`
+	TimeStep      int64               `json:"intervalStep"`
+	DateRange     *DateRange          `json:"dateRange"`
+}
+
 type CategoryStatsResponse struct {
 	*SuccessResponse
 	*DateRange
@@ -60,4 +72,10 @@ type TotalAccountsStatsResponse struct {
 	*SuccessResponse
 	*DateRange
 	Stats TotalAccountsStats `json:"stats"`
+}
+
+type TimeIntervalStatsResponse struct {
+	*SuccessResponse
+	*DateRange
+	Stats TimeIntervalStats `json:"stats"`
 }

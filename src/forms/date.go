@@ -16,6 +16,10 @@ type RelativeCurrency struct {
 	Symbol string `json:"currency" form:"currency"`
 }
 
+type TimeInterval struct {
+	Interval string `json:"interval" form:"interval"`
+}
+
 func (dateRange *DateRange) ToDateTimeRange() *DateTimeRange {
 	return &DateTimeRange{
 		FromDate: time.Unix(dateRange.FromDate, 0),

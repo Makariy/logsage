@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 	"main/db_connector"
@@ -9,25 +10,32 @@ import (
 	"time"
 )
 
-func getTransactionsByDateRangeBase(db *gorm.DB, fromDate, toDate time.Time) *gorm.DB {
+func queryTransactions(db *gorm.DB) *gorm.DB {
+	return db.Model(models.Transaction{})
+}
+
+func queryTransactionsByDate(db *gorm.DB, fromDate, toDate time.Time) *gorm.DB {
 	return db.Model(models.Transaction{}).
 		Where("? <= date", fromDate).
 		Where("date <= ?", toDate)
 }
 
-func getStatsQueryJoinCategory(db *gorm.DB, fromDate, toDate time.Time) *gorm.DB {
-	return getTransactionsByDateRangeBase(db, fromDate, toDate).
-		Joins("INNER JOIN category ON category_id = category.id")
+func queryJoinCategory(db *gorm.DB) *gorm.DB {
+	return db.Joins("LEFT JOIN category ON category_id = category.id")
 }
 
-func getStatsQueryJoinCategoryByType(
+func queryJoinCategoryByType(
 	db *gorm.DB,
-	fromDate,
-	toDate time.Time,
-	categoryType string,
+	categoryType models.CategoryType,
 ) *gorm.DB {
-	return getStatsQueryJoinCategory(db, fromDate, toDate).
-		Where("category.type = ?", categoryType)
+	return queryJoinCategory(
+		queryTransactions(db),
+	).Where("category.type = ?", categoryType)
+}
+
+func queryJoinAccountAndCurrency(db *gorm.DB) *gorm.DB {
+	return db.Joins("LEFT JOIN account ON transaction.account_id = account.id").
+		Joins("LEFT JOIN currency ON account.currency_id = currency.id")
 }
 
 func getTotalTransactionsAmount(
@@ -35,8 +43,9 @@ func getTotalTransactionsAmount(
 ) (decimal.Decimal, error) {
 	var totalPrice decimal.Decimal
 
-	tx := db.Joins("INNER JOIN account ON transaction.account_id = account.id").
-		Joins("INNER JOIN currency ON account.currency_id = currency.id").
+	tx := queryJoinAccountAndCurrency(
+		queryTransactions(db),
+	).
 		Select("COALESCE(SUM(transaction.amount::numeric * currency.value::numeric), 0)").
 		Scan(&totalPrice)
 
@@ -61,7 +70,7 @@ func GetCategoryStats(
 	}
 
 	totalCategoryAmount, err := getTotalTransactionsAmount(
-		getTransactionsByDateRangeBase(db, fromDate, toDate).
+		queryTransactionsByDate(db, fromDate, toDate).
 			Where("category_id = ?", categoryID),
 	)
 	if err != nil {
@@ -75,7 +84,7 @@ func GetCategoryStats(
 
 	stats := forms.CategoryStats{
 		Category:     *category,
-		TotalAmount:  totalCategoryAmount.Div(outputCurrency.Value),
+		TotalAmount:  ConvertToRelativeCurrency(totalCategoryAmount, outputCurrency),
 		Transactions: transactions,
 	}
 	return &stats, nil
@@ -85,10 +94,13 @@ func getTotalTransactedAmountByType(
 	db *gorm.DB,
 	fromDate,
 	toDate time.Time,
-	categoryType string,
+	categoryType models.CategoryType,
 ) (decimal.Decimal, error) {
 	return getTotalTransactionsAmount(
-		getStatsQueryJoinCategoryByType(db, fromDate, toDate, categoryType),
+		queryJoinCategoryByType(
+			queryTransactionsByDate(db, fromDate, toDate),
+			categoryType,
+		),
 	)
 }
 
@@ -97,10 +109,13 @@ func getAccountTransactedAmountByType(
 	fromDate,
 	toDate time.Time,
 	accountID models.ModelID,
-	categoryType string,
+	categoryType models.CategoryType,
 ) (amount decimal.Decimal, err error) {
 	return getTotalTransactionsAmount(
-		getStatsQueryJoinCategoryByType(db, fromDate, toDate, categoryType).
+		queryJoinCategoryByType(
+			queryTransactionsByDate(db, fromDate, toDate),
+			categoryType,
+		).
 			Where("account_id = ?", accountID),
 	)
 }
@@ -209,8 +224,8 @@ func GetTotalCategoriesStats(
 	}
 
 	stats := forms.TotalCategoriesStats{
-		TotalEarnedAmount: totalEarnedAmount.Div(outputCurrency.Value),
-		TotalSpentAmount:  totalSpentAmount.Div(outputCurrency.Value),
+		TotalEarnedAmount: ConvertToRelativeCurrency(totalEarnedAmount, outputCurrency),
+		TotalSpentAmount:  ConvertToRelativeCurrency(totalSpentAmount, outputCurrency),
 		CategoriesStats:   categoriesStats,
 	}
 	return &stats, nil
@@ -243,4 +258,186 @@ func GetTotalAccountsStats(
 		AccountsStats:     accountsStats,
 	}
 	return &stats, nil
+}
+
+type rawIntervalStat struct {
+	TotalEarnedAmount decimal.Decimal
+	TotalSpentAmount  decimal.Decimal
+	Date              time.Time
+}
+
+func getSelectSumByCategoryType(categoryType models.CategoryType) string {
+	return "COALESCE(" +
+		fmt.Sprintf("SUM(case when category.type = '%s' ", categoryType) +
+		"then transaction.amount::numeric * currency.value::numeric " +
+		"else 0 end), " +
+		"0)"
+}
+
+func renderQueryInterval(interval models.TimeIntervalStep) string {
+	return fmt.Sprintf("'1 %s'::interval", string(interval))
+}
+
+func queryTimeIntervalSeries(
+	db *gorm.DB,
+	interval models.TimeIntervalStep,
+	fromDate time.Time,
+	toDate time.Time,
+) *gorm.DB {
+	return db.Table(""+
+		fmt.Sprintf(
+			"generate_series(?, ?, %s) as date_start",
+			renderQueryInterval(interval),
+		), fromDate, toDate,
+	)
+}
+
+func queryJoinTransactionsByUserInInterval(
+	db *gorm.DB,
+	interval models.TimeIntervalStep,
+	userID models.ModelID,
+) *gorm.DB {
+	return db.Joins(
+		"LEFT JOIN transaction ON date_start <= transaction.date "+
+			"AND "+
+			fmt.Sprintf(
+				"transaction.date < date_start + %s",
+				renderQueryInterval(interval),
+			)+
+			" AND transaction.user_id = ?", userID,
+	)
+}
+
+func getSelectTotalAmounts() []string {
+	return []string{
+		getSelectSumByCategoryType(models.EARNING) +
+			" as total_earned_amount",
+		getSelectSumByCategoryType(models.SPENDING) +
+			" as total_spent_amount",
+	}
+}
+
+func getRawTimeIntervalStats(
+	userID models.ModelID,
+	fromDate,
+	toDate time.Time,
+	step models.TimeIntervalStep,
+) ([]rawIntervalStat, error) {
+	db := db_connector.GetConnection()
+
+	var result []rawIntervalStat
+
+	tx := queryJoinAccountAndCurrency(
+		queryJoinCategory(
+			queryJoinTransactionsByUserInInterval(
+				queryTimeIntervalSeries(db, step, fromDate, toDate),
+				step,
+				userID,
+			),
+		),
+	).
+		Select(append(getSelectTotalAmounts(), "date_start as date")).
+		Group("date_start").
+		Order("date_start ASC").
+		Find(&result)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return result, nil
+}
+
+func getToDateForStat(
+	rawStats []rawIntervalStat,
+	index int,
+	step models.TimeIntervalStep,
+) int64 {
+	if index >= len(rawStats)-1 {
+		return rawStats[index].Date.Unix() + models.ConvertTimeStepToTime(step)
+	}
+
+	return rawStats[index+1].Date.Unix()
+}
+
+func getRawStatDateRangeByIndex(
+	rawStats []rawIntervalStat,
+	index int,
+	step models.TimeIntervalStep,
+) *forms.DateRange {
+	stat := rawStats[index]
+	return &forms.DateRange{
+		FromDate: stat.Date.Unix(),
+		ToDate:   getToDateForStat(rawStats, index, step),
+	}
+}
+
+func parseRawIntervalStat(
+	rawStats []rawIntervalStat,
+	index int,
+	step models.TimeIntervalStep,
+	outputCurrency *models.Currency,
+) *forms.TimeIntervalStat {
+	rawStat := rawStats[index]
+	return &forms.TimeIntervalStat{
+		TotalSpentAmount:  ConvertToRelativeCurrency(rawStat.TotalSpentAmount, outputCurrency),
+		TotalEarnedAmount: ConvertToRelativeCurrency(rawStat.TotalEarnedAmount, outputCurrency),
+		DateRange:         getRawStatDateRangeByIndex(rawStats, index, step),
+	}
+}
+
+func parseRawIntervalStats(
+	rawStats []rawIntervalStat,
+	fromDate,
+	toDate time.Time,
+	step models.TimeIntervalStep,
+	outputCurrency *models.Currency,
+) *forms.TimeIntervalStats {
+	result := forms.TimeIntervalStats{
+		DateRange: &forms.DateRange{
+			FromDate: fromDate.Unix(),
+			ToDate:   toDate.Unix(),
+		},
+		TimeStep: models.ConvertTimeStepToTime(step),
+	}
+
+	for index := range rawStats {
+		result.IntervalStats = append(
+			result.IntervalStats,
+			parseRawIntervalStat(
+				rawStats,
+				index,
+				step,
+				outputCurrency,
+			),
+		)
+	}
+	return &result
+}
+
+func GetTimeIntervalStats(
+	userID models.ModelID,
+	fromDate,
+	toDate time.Time,
+	step models.TimeIntervalStep,
+	outputCurrency *models.Currency,
+) (*forms.TimeIntervalStats, error) {
+	rawStats, err := getRawTimeIntervalStats(
+		userID,
+		fromDate,
+		toDate,
+		step,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	stats := parseRawIntervalStats(
+		rawStats,
+		fromDate,
+		toDate,
+		step,
+		outputCurrency,
+	)
+
+	return stats, nil
 }
