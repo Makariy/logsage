@@ -12,7 +12,8 @@ type UserForm struct {
 
 type UserResponse struct {
 	*SuccessResponse
-	Email     string           `json:"email"`
-	LastLogin time.Time        `json:"lastLogin"`
-	Token     models.AuthToken `json:"token"`
+	Email            string           `json:"email"`
+	Token            models.AuthToken `json:"token"`
+	LastLogin        time.Time        `json:"lastLogin"`
+	RegistrationDate time.Time        `json:"registrationDate"`
 }
