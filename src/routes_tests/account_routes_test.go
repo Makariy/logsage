@@ -55,7 +55,7 @@ func (suite *AccountRoutesSuit) TestHandleCreateAccount() {
 		suite.Error(err)
 	}
 
-	TestAccountsEqual(&accountResponse, response, &suite.Suite)
+	TestAccountsEqual(&suite.Suite, &accountResponse, response)
 }
 
 func (suite *AccountRoutesSuit) TestHandleGetAccount() {
@@ -84,7 +84,7 @@ func (suite *AccountRoutesSuit) TestHandleGetAccount() {
 		suite.Error(err)
 	}
 
-	TestAccountsEqual(expected, response, &suite.Suite)
+	TestAccountsEqual(&suite.Suite, expected, response)
 }
 
 func (suite *AccountRoutesSuit) TestHandleGetAllAccounts() {
@@ -121,8 +121,8 @@ func (suite *AccountRoutesSuit) TestHandleGetAllAccounts() {
 		suite.Error(err)
 	}
 
-	TestAccountsEqual(firstForm, response.Accounts[0], &suite.Suite)
-	TestAccountsEqual(secondForm, response.Accounts[1], &suite.Suite)
+	TestAccountsEqual(&suite.Suite, firstForm, response.Accounts[0])
+	TestAccountsEqual(&suite.Suite, secondForm, response.Accounts[1])
 }
 
 func (suite *AccountRoutesSuit) TestHandlePatchAccount() {
@@ -166,7 +166,7 @@ func (suite *AccountRoutesSuit) TestHandlePatchAccount() {
 	if err != nil {
 		suite.Error(err)
 	}
-	TestAccountsEqual(expectedForm, response, &suite.Suite)
+	TestAccountsEqual(&suite.Suite, expectedForm, response)
 }
 
 func (suite *AccountRoutesSuit) TestHandleDeleteAccount() {
@@ -193,5 +193,5 @@ func (suite *AccountRoutesSuit) TestHandleDeleteAccount() {
 	if err != nil {
 		suite.Error(err)
 	}
-	TestAccountsEqual(expectedForm, response, &suite.Suite)
+	TestAccountsEqual(&suite.Suite, expectedForm, response)
 }

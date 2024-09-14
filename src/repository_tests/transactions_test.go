@@ -49,7 +49,7 @@ func (suite *TransactionRepositorySuit) TestCreateTransaction() {
 		Account:     *suite.base.FirstAccount,
 	}
 
-	TestTransactionsEqual(&expected, transaction, &suite.Suite)
+	TestTransactionsEqual(&suite.Suite, &expected, transaction)
 }
 
 func (suite *TransactionRepositorySuit) TestGetTransactionByID() {
@@ -80,7 +80,7 @@ func (suite *TransactionRepositorySuit) TestGetTransactionByID() {
 		Account:     transaction.Account,
 	}
 
-	TestTransactionsEqual(&expected, result, &suite.Suite)
+	TestTransactionsEqual(&suite.Suite, &expected, result)
 }
 
 func (suite *TransactionRepositorySuit) TestGetAllTransactions() {
@@ -114,16 +114,16 @@ func (suite *TransactionRepositorySuit) TestGetAllTransactions() {
 	suite.Equal(2, len(transactions))
 
 	for _, transaction := range transactions {
-		TestUsersEqual(suite.base.User, &transaction.User, &suite.Suite)
+		TestUsersEqual(&suite.Suite, suite.base.User, &transaction.User)
 	}
 
 	isFirstFirst := transactions[0].ID == first.ID
 	if isFirstFirst {
-		TestTransactionsEqual(first, transactions[0], &suite.Suite)
-		TestTransactionsEqual(second, transactions[1], &suite.Suite)
+		TestTransactionsEqual(&suite.Suite, first, transactions[0])
+		TestTransactionsEqual(&suite.Suite, second, transactions[1])
 	} else {
-		TestTransactionsEqual(first, transactions[1], &suite.Suite)
-		TestTransactionsEqual(second, transactions[0], &suite.Suite)
+		TestTransactionsEqual(&suite.Suite, first, transactions[1])
+		TestTransactionsEqual(&suite.Suite, second, transactions[0])
 	}
 }
 
@@ -169,7 +169,7 @@ func (suite *TransactionRepositorySuit) TestPatchTransaction() {
 		Account:     transaction.Account,
 	}
 
-	TestTransactionsEqual(&expected, patched, &suite.Suite)
+	TestTransactionsEqual(&suite.Suite, &expected, patched)
 }
 
 func (suite *TransactionRepositorySuit) TestDeleteTransaction() {
@@ -190,7 +190,7 @@ func (suite *TransactionRepositorySuit) TestDeleteTransaction() {
 		suite.Error(err)
 	}
 
-	TestTransactionsEqual(transaction, result, &suite.Suite)
+	TestTransactionsEqual(&suite.Suite, transaction, result)
 
 	transactions, err := repository.GetUserTransactions(transaction.User.ID)
 	if err != nil {

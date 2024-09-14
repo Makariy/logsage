@@ -59,7 +59,7 @@ func (suite *TransactionRoutesSuit) TestHandleCreateTransaction() {
 		suite.Error(err, "Пиздец")
 	}
 
-	TestTransactionsEqual(&transactionResponse, response, &suite.Suite)
+	TestTransactionsEqual(&suite.Suite, &transactionResponse, response)
 }
 
 func (suite *TransactionRoutesSuit) TestHandleGetTransaction() {
@@ -85,7 +85,7 @@ func (suite *TransactionRoutesSuit) TestHandleGetTransaction() {
 		suite.Error(err)
 	}
 
-	TestTransactionsEqual(expected, response, &suite.Suite)
+	TestTransactionsEqual(&suite.Suite, expected, response)
 }
 
 func (suite *TransactionRoutesSuit) TestHandleGetAllTransactions() {
@@ -125,8 +125,8 @@ func (suite *TransactionRoutesSuit) TestHandleGetAllTransactions() {
 		suite.Error(err)
 	}
 
-	TestTransactionsEqual(firstForm, response.Transactions[1], &suite.Suite)
-	TestTransactionsEqual(secondForm, response.Transactions[0], &suite.Suite)
+	TestTransactionsEqual(&suite.Suite, firstForm, response.Transactions[1])
+	TestTransactionsEqual(&suite.Suite, secondForm, response.Transactions[0])
 }
 
 func (suite *TransactionRoutesSuit) TestHandlePatchTransaction() {
@@ -172,7 +172,7 @@ func (suite *TransactionRoutesSuit) TestHandlePatchTransaction() {
 	if err != nil {
 		suite.Error(err)
 	}
-	TestTransactionsEqual(expectedForm, response, &suite.Suite)
+	TestTransactionsEqual(&suite.Suite, expectedForm, response)
 }
 
 func (suite *TransactionRoutesSuit) TestHandleDeleteTransaction() {
@@ -197,5 +197,5 @@ func (suite *TransactionRoutesSuit) TestHandleDeleteTransaction() {
 	if err != nil {
 		suite.Error(err)
 	}
-	TestTransactionsEqual(expectedForm, response, &suite.Suite)
+	TestTransactionsEqual(&suite.Suite, expectedForm, response)
 }

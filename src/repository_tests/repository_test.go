@@ -16,7 +16,6 @@ func TestAccountSuite(t *testing.T) {
 func TestTransactionSuite(t *testing.T) {
 	suite.Run(t, new(TransactionRepositorySuit))
 }
-
 func TestStatsSuite(t *testing.T) {
 	suite.Run(t, new(StatsRepositorySuit))
 }

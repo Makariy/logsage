@@ -52,7 +52,7 @@ func (suite *CategoryRoutesSuit) TestHandleCreateCategory() {
 		suite.Error(err)
 	}
 
-	TestCategoriesEqual(&categoryResponse, response, &suite.Suite)
+	TestCategoriesEqual(&suite.Suite, &categoryResponse, response)
 }
 
 func (suite *CategoryRoutesSuit) TestHandleGetCategory() {
@@ -78,7 +78,7 @@ func (suite *CategoryRoutesSuit) TestHandleGetCategory() {
 		suite.Error(err)
 	}
 
-	TestCategoriesEqual(expected, response, &suite.Suite)
+	TestCategoriesEqual(&suite.Suite, expected, response)
 }
 
 func (suite *CategoryRoutesSuit) TestHandleGetAllCategories() {
@@ -115,8 +115,8 @@ func (suite *CategoryRoutesSuit) TestHandleGetAllCategories() {
 		suite.Error(err)
 	}
 
-	TestCategoriesEqual(firstForm, response.Categories[0], &suite.Suite)
-	TestCategoriesEqual(secondForm, response.Categories[1], &suite.Suite)
+	TestCategoriesEqual(&suite.Suite, firstForm, response.Categories[0])
+	TestCategoriesEqual(&suite.Suite, secondForm, response.Categories[1])
 }
 
 func (suite *CategoryRoutesSuit) TestHandlePatchCategory() {
@@ -156,7 +156,7 @@ func (suite *CategoryRoutesSuit) TestHandlePatchCategory() {
 	if err != nil {
 		suite.Error(err)
 	}
-	TestCategoriesEqual(expectedForm, response, &suite.Suite)
+	TestCategoriesEqual(&suite.Suite, expectedForm, response)
 }
 
 func (suite *CategoryRoutesSuit) TestHandleDeleteCategory() {
@@ -181,5 +181,5 @@ func (suite *CategoryRoutesSuit) TestHandleDeleteCategory() {
 	if err != nil {
 		suite.Error(err)
 	}
-	TestCategoriesEqual(expectedForm, response, &suite.Suite)
+	TestCategoriesEqual(&suite.Suite, expectedForm, response)
 }

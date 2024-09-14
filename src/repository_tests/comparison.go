@@ -21,76 +21,81 @@ func compareDecimal(suite *suite.Suite, expected, actual decimal.Decimal, messag
 	)
 }
 
-func TestUsersEqual(expected, actual *models.User, suite *suite.Suite) {
+func TestDateRangeEqual(suite *suite.Suite, expected, actual *forms.DateRange) {
+	suite.Equal(expected.FromDate, actual.FromDate)
+	suite.Equal(expected.ToDate, actual.ToDate)
+}
+
+func TestUsersEqual(suite *suite.Suite, expected, actual *models.User) {
 	suite.Equal(expected.ID, actual.ID)
 	suite.Equal(expected.Email, actual.Email)
 }
 
-func TestCategoriesEqual(expected, actual *models.Category, suite *suite.Suite) {
+func TestCategoriesEqual(suite *suite.Suite, expected, actual *models.Category) {
 	suite.Equal(expected.ID, actual.ID)
 	suite.Equal(expected.Name, actual.Name)
 	suite.Equal(expected.Type, actual.Type)
 }
 
-func TestCurrencyEqual(expected, actual *models.Currency, suite *suite.Suite) {
+func TestCurrencyEqual(suite *suite.Suite, expected, actual *models.Currency) {
 	suite.Equal(expected.ID, actual.ID)
 	suite.Equal(expected.Name, actual.Name)
 }
 
-func TestAccountsEqual(expected, actual *models.Account, suite *suite.Suite) {
+func TestAccountsEqual(suite *suite.Suite, expected, actual *models.Account) {
 	suite.Equal(expected.Name, actual.Name)
 	compareDecimal(suite, expected.Balance, actual.Balance)
 	suite.Equal(expected.Name, actual.Name)
 
-	TestCurrencyEqual(&expected.Currency, &actual.Currency, suite)
-	TestUsersEqual(&expected.User, &actual.User, suite)
+	TestCurrencyEqual(suite, &expected.Currency, &actual.Currency)
+	TestUsersEqual(suite, &expected.User, &actual.User)
 }
 
-func TestTransactionsEqual(expected, actual *models.Transaction, suite *suite.Suite) {
+func TestTransactionsEqual(suite *suite.Suite, expected, actual *models.Transaction) {
 	suite.Equal(expected.ID, actual.ID)
 	suite.Equal(expected.Description, actual.Description)
 	suite.True(expected.Date.Truncate(time.Second).Equal(actual.Date.Truncate(time.Second)))
 	compareDecimal(suite, expected.Amount, actual.Amount)
 
-	TestUsersEqual(&expected.User, &actual.User, suite)
-	TestCategoriesEqual(&expected.Category, &actual.Category, suite)
-	TestAccountsEqual(&expected.Account, &actual.Account, suite)
+	TestUsersEqual(suite, &expected.User, &actual.User)
+	TestCategoriesEqual(suite, &expected.Category, &actual.Category)
+	TestAccountsEqual(suite, &expected.Account, &actual.Account)
 }
 
-func TestCategoriesStatsEqual(expected, actual *forms.CategoryStats, suite *suite.Suite) {
+func TestCategoriesStatsEqual(suite *suite.Suite, expected, actual *forms.CategoryStats) {
 	compareDecimal(suite, expected.TotalAmount, actual.TotalAmount)
 
-	TestCategoriesEqual(&expected.Category, &actual.Category, suite)
+	TestCategoriesEqual(suite, &expected.Category, &actual.Category)
 
 	suite.Equal(len(expected.Transactions), len(actual.Transactions))
 	for i := range expected.Transactions {
-		TestTransactionsEqual(expected.Transactions[i], actual.Transactions[i], suite)
+		TestTransactionsEqual(suite, expected.Transactions[i], actual.Transactions[i])
 	}
 }
 
-func TestAccountStatsEqual(expected, actual *forms.AccountStats, suite *suite.Suite) {
+func TestAccountStatsEqual(suite *suite.Suite, expected, actual *forms.AccountStats) {
 	compareDecimal(suite, expected.TotalSpentAmount, actual.TotalSpentAmount)
 	compareDecimal(suite, expected.TotalEarnedAmount, actual.TotalEarnedAmount)
 
-	TestAccountsEqual(&expected.Account, &actual.Account, suite)
+	TestAccountsEqual(suite, &expected.Account, &actual.Account)
 
 	suite.Equal(len(expected.Transactions), len(actual.Transactions))
 	for i := range expected.Transactions {
-		TestTransactionsEqual(expected.Transactions[i], actual.Transactions[i], suite)
+		TestTransactionsEqual(suite, expected.Transactions[i], actual.Transactions[i])
 	}
 }
 
-func TestTotalCategoriesStatsEqual(expected, actual *forms.TotalCategoriesStats, suite *suite.Suite) {
+func TestTotalCategoriesStatsEqual(suite *suite.Suite, expected, actual *forms.TotalCategoriesStats) {
 	compareDecimal(suite, expected.TotalEarnedAmount, actual.TotalEarnedAmount)
 	compareDecimal(suite, expected.TotalSpentAmount, actual.TotalSpentAmount)
 
 	suite.Equal(len(expected.CategoriesStats), len(actual.CategoriesStats))
 	for i := range expected.CategoriesStats {
-		TestCategoriesStatsEqual(expected.CategoriesStats[i], actual.CategoriesStats[i], suite)
+		TestCategoriesStatsEqual(suite, expected.CategoriesStats[i], actual.CategoriesStats[i])
 	}
 }
 
-func TestTotalAccountsStatsEqual(expected, actual *forms.TotalAccountsStats, suite *suite.Suite) {
+func TestTotalAccountsStatsEqual(suite *suite.Suite, expected, actual *forms.TotalAccountsStats) {
 	compareDecimal(
 		suite,
 		expected.TotalEarnedAmount,
@@ -106,6 +111,23 @@ func TestTotalAccountsStatsEqual(expected, actual *forms.TotalAccountsStats, sui
 
 	suite.Equal(len(expected.AccountsStats), len(actual.AccountsStats))
 	for i := range expected.AccountsStats {
-		TestAccountStatsEqual(expected.AccountsStats[i], actual.AccountsStats[i], suite)
+		TestAccountStatsEqual(suite, expected.AccountsStats[i], actual.AccountsStats[i])
+	}
+}
+
+func TestTimeIntervalStatEqual(suite *suite.Suite, expected, actual *forms.TimeIntervalStat) {
+	compareDecimal(suite, expected.TotalEarnedAmount, actual.TotalEarnedAmount)
+	compareDecimal(suite, expected.TotalSpentAmount, actual.TotalSpentAmount)
+	TestDateRangeEqual(suite, expected.DateRange, actual.DateRange)
+}
+
+func TestTimeIntervalStatsEqual(suite *suite.Suite, expected, actual *forms.TimeIntervalStats) {
+	suite.Equal(expected.TimeStep, actual.TimeStep, "interval stats time step do not match")
+	TestDateRangeEqual(suite, expected.DateRange, actual.DateRange)
+
+	suite.Equal(len(expected.IntervalStats), len(actual.IntervalStats))
+
+	for index := range expected.IntervalStats {
+		TestTimeIntervalStatEqual(suite, expected.IntervalStats[index], actual.IntervalStats[index])
 	}
 }

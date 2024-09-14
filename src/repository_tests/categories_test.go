@@ -33,7 +33,7 @@ func (suite *CategoryRepositorySuit) TestCreateCategory() {
 		Type: categoryType,
 		User: *suite.base.User,
 	}
-	TestCategoriesEqual(&expected, category, &suite.Suite)
+	TestCategoriesEqual(&suite.Suite, &expected, category)
 }
 
 func (suite *CategoryRepositorySuit) TestGetCategoryByID() {
@@ -47,7 +47,7 @@ func (suite *CategoryRepositorySuit) TestGetCategoryByID() {
 		suite.Error(err)
 	}
 
-	TestCategoriesEqual(category, result, &suite.Suite)
+	TestCategoriesEqual(&suite.Suite, category, result)
 }
 
 func (suite *CategoryRepositorySuit) TestGetAllCategories() {
@@ -67,16 +67,16 @@ func (suite *CategoryRepositorySuit) TestGetAllCategories() {
 	suite.Equal(2, len(categories))
 
 	for _, category := range categories {
-		TestUsersEqual(suite.base.User, &category.User, &suite.Suite)
+		TestUsersEqual(&suite.Suite, suite.base.User, &category.User)
 	}
 
 	isFirstFirst := categories[0].ID == first.ID
 	if isFirstFirst {
-		TestCategoriesEqual(first, categories[0], &suite.Suite)
-		TestCategoriesEqual(second, categories[1], &suite.Suite)
+		TestCategoriesEqual(&suite.Suite, first, categories[0])
+		TestCategoriesEqual(&suite.Suite, second, categories[1])
 	} else {
-		TestCategoriesEqual(first, categories[1], &suite.Suite)
-		TestCategoriesEqual(second, categories[0], &suite.Suite)
+		TestCategoriesEqual(&suite.Suite, first, categories[1])
+		TestCategoriesEqual(&suite.Suite, second, categories[0])
 	}
 }
 
@@ -87,8 +87,8 @@ func (suite *CategoryRepositorySuit) TestPatchCategory() {
 	}
 
 	var (
-		newName = "New category"
-		newType = "New type"
+		newName                     = "New category"
+		newType models.CategoryType = "New type"
 	)
 
 	patched, err := repository.PatchCategory(category.ID, newName, newType, suite.base.User.ID)
@@ -103,7 +103,7 @@ func (suite *CategoryRepositorySuit) TestPatchCategory() {
 		User: category.User,
 	}
 
-	TestCategoriesEqual(&expected, patched, &suite.Suite)
+	TestCategoriesEqual(&suite.Suite, &expected, patched)
 }
 
 func (suite *CategoryRepositorySuit) TestDeleteCategory() {
@@ -116,7 +116,7 @@ func (suite *CategoryRepositorySuit) TestDeleteCategory() {
 	if err != nil {
 		suite.Error(err)
 	}
-	TestCategoriesEqual(category, result, &suite.Suite)
+	TestCategoriesEqual(&suite.Suite, category, result)
 
 	categories, err := repository.GetUserCategories(category.User.ID)
 	if err != nil {

@@ -47,7 +47,7 @@ func (suite *StatsRepositorySuit) TestGetCategoryStats() {
 		},
 	}
 
-	TestCategoriesStatsEqual(&expected, categoryStats, &suite.Suite)
+	TestCategoriesStatsEqual(&suite.Suite, &expected, categoryStats)
 }
 
 func (suite *StatsRepositorySuit) TestGetAccountStats() {
@@ -68,7 +68,7 @@ func (suite *StatsRepositorySuit) TestGetAccountStats() {
 		},
 	}
 
-	TestAccountStatsEqual(&expected, accountStats, &suite.Suite)
+	TestAccountStatsEqual(&suite.Suite, &expected, accountStats)
 }
 
 func (suite *StatsRepositorySuit) TestGetTotalAccountsStats() {
@@ -109,7 +109,7 @@ func (suite *StatsRepositorySuit) TestGetTotalAccountsStats() {
 		},
 	}
 
-	TestTotalAccountsStatsEqual(&expected, totalStats, &suite.Suite)
+	TestTotalAccountsStatsEqual(&suite.Suite, &expected, totalStats)
 }
 
 func (suite *StatsRepositorySuit) TestGetTotalCategoriesStats() {
@@ -152,5 +152,61 @@ func (suite *StatsRepositorySuit) TestGetTotalCategoriesStats() {
 		},
 	}
 
-	TestTotalCategoriesStatsEqual(&expected, totalStats, &suite.Suite)
+	TestTotalCategoriesStatsEqual(&suite.Suite, &expected, totalStats)
+}
+
+func (suite *StatsRepositorySuit) TestGetTimeIntervalStats() {
+	stats, err := repository.GetTimeIntervalStats(
+		suite.base.User.ID,
+		fromDate,
+		toDate,
+		"day",
+		suite.base.FirstCurrency,
+	)
+	suite.True(err == nil)
+
+	dayDuration := int64(24 * time.Hour / time.Second)
+	expected := &forms.TimeIntervalStats{
+		TimeStep: int64(24 * time.Hour / time.Second),
+		DateRange: &forms.DateRange{
+			FromDate: fromDate.Unix(),
+			ToDate:   toDate.Unix(),
+		},
+		IntervalStats: []*forms.TimeIntervalStat{
+			{
+				TotalSpentAmount:  decimal.NewFromInt(100),
+				TotalEarnedAmount: decimal.Zero,
+				DateRange: &forms.DateRange{
+					FromDate: fromDate.Unix(),
+					ToDate:   fromDate.Unix() + dayDuration,
+				},
+			},
+			{
+				TotalSpentAmount:  decimal.NewFromInt(200),
+				TotalEarnedAmount: decimal.Zero,
+				DateRange: &forms.DateRange{
+					FromDate: fromDate.Unix() + dayDuration,
+					ToDate:   fromDate.Unix() + dayDuration*2,
+				},
+			},
+			{
+				TotalSpentAmount:  decimal.Zero,
+				TotalEarnedAmount: decimal.NewFromInt(3),
+				DateRange: &forms.DateRange{
+					FromDate: fromDate.Unix() + dayDuration*2,
+					ToDate:   fromDate.Unix() + dayDuration*3,
+				},
+			},
+			{
+				TotalSpentAmount:  decimal.Zero,
+				TotalEarnedAmount: decimal.NewFromInt(4),
+				DateRange: &forms.DateRange{
+					FromDate: fromDate.Unix() + dayDuration*3,
+					ToDate:   fromDate.Unix() + dayDuration*4,
+				},
+			},
+		},
+	}
+
+	TestTimeIntervalStatsEqual(&suite.Suite, expected, stats)
 }

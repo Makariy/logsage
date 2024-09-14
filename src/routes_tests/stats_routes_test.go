@@ -81,7 +81,7 @@ func (suite *StatsRoutesSuit) TestHandleGetCategoryStats() {
 		},
 	}
 
-	TestCategoryStatsEqual(&expected, categoryStats, &suite.Suite)
+	TestCategoryStatsEqual(&suite.Suite, &expected, categoryStats)
 }
 
 func (suite *StatsRoutesSuit) TestHandleGetAccountStats() {
@@ -131,7 +131,7 @@ func (suite *StatsRoutesSuit) TestHandleGetAccountStats() {
 		},
 	}
 
-	TestAccountStatsEqual(&expected, accountStats, &suite.Suite)
+	TestAccountStatsEqual(&suite.Suite, &expected, accountStats)
 }
 
 func (suite *StatsRoutesSuit) TestHandleGetTotalAccountsStats() {
@@ -187,7 +187,7 @@ func (suite *StatsRoutesSuit) TestHandleGetTotalAccountsStats() {
 		},
 	}
 
-	TestTotalAccountsStatsEqual(&expected, stats, &suite.Suite)
+	TestTotalAccountsStatsEqual(&suite.Suite, &expected, stats)
 }
 
 func (suite *StatsRoutesSuit) TestHandleGetTotalCategoriesStats() {
@@ -242,5 +242,5 @@ func (suite *StatsRoutesSuit) TestHandleGetTotalCategoriesStats() {
 		},
 	}
 
-	TestTotalCategoriesStatsEqual(&expected, stats, &suite.Suite)
+	TestTotalCategoriesStatsEqual(&suite.Suite, &expected, stats)
 }

@@ -57,5 +57,5 @@ func (suite *CurrencyRoutesSuit) TestHandleGetAllCurrencies() {
 	if err != nil {
 		suite.Error(err)
 	}
-	TestCurrenciesEqual(expectedForm, response.Currencies[0], &suite.Suite)
+	TestCurrenciesEqual(&suite.Suite, expectedForm, response.Currencies[0])
 }

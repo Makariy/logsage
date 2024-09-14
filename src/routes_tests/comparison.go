@@ -7,50 +7,50 @@ import (
 	"time"
 )
 
-func TestCurrenciesEqual(expected, actual *forms.CurrencyResponse, suite *suite.Suite) {
+func TestCurrenciesEqual(suite *suite.Suite, expected, actual *forms.CurrencyResponse) {
 	suite.Equal(expected.ID, actual.ID)
 	suite.Equal(expected.Name, actual.Name)
 	suite.Equal(expected.Symbol, actual.Symbol)
 }
 
-func TestCategoriesEqual(expected, actual *forms.CategoryResponse, suite *suite.Suite) {
+func TestCategoriesEqual(suite *suite.Suite, expected, actual *forms.CategoryResponse) {
 	suite.Equal(expected.ID, actual.ID)
 	suite.Equal(expected.Name, actual.Name)
 	suite.Equal(expected.Type, actual.Type)
 }
 
-func TestAccountsEqual(expected, actual *forms.AccountResponse, suite *suite.Suite) {
+func TestAccountsEqual(suite *suite.Suite, expected, actual *forms.AccountResponse) {
 	suite.Equal(expected.ID, actual.ID)
 	suite.Equal(expected.Name, actual.Name)
 	suite.True(expected.Balance.Equal(actual.Balance))
 
-	TestCurrenciesEqual(expected.Currency, actual.Currency, suite)
+	TestCurrenciesEqual(suite, expected.Currency, actual.Currency)
 }
 
-func TestTransactionsEqual(expected, actual *forms.TransactionResponse, suite *suite.Suite) {
+func TestTransactionsEqual(suite *suite.Suite, expected, actual *forms.TransactionResponse) {
 	suite.Equal(expected.ID, actual.ID)
 	suite.Equal(expected.Description, actual.Description)
 	suite.True(expected.Amount.Equal(actual.Amount))
 	suite.True(expected.Date.Truncate(time.Second).Equal(actual.Date.Truncate(time.Second)))
 
-	TestCategoriesEqual(&expected.Category, &actual.Category, suite)
-	TestAccountsEqual(&expected.Account, &actual.Account, suite)
+	TestCategoriesEqual(suite, &expected.Category, &actual.Category)
+	TestAccountsEqual(suite, &expected.Account, &actual.Account)
 }
 
-func TestCategoryStatsEqual(expected, actual *forms.CategoryStatsResponse, suite *suite.Suite) {
-	TestCategoriesEqual(&expected.Category, &actual.Category, suite)
-	repository_tests.TestCategoriesStatsEqual(&expected.Stats, &actual.Stats, suite)
+func TestCategoryStatsEqual(suite *suite.Suite, expected, actual *forms.CategoryStatsResponse) {
+	TestCategoriesEqual(suite, &expected.Category, &actual.Category)
+	repository_tests.TestCategoriesStatsEqual(suite, &expected.Stats, &actual.Stats)
 }
 
-func TestAccountStatsEqual(expected, actual *forms.AccountStatsResponse, suite *suite.Suite) {
-	TestAccountsEqual(&expected.Account, &actual.Account, suite)
-	repository_tests.TestAccountStatsEqual(&expected.Stats, &actual.Stats, suite)
+func TestAccountStatsEqual(suite *suite.Suite, expected, actual *forms.AccountStatsResponse) {
+	TestAccountsEqual(suite, &expected.Account, &actual.Account)
+	repository_tests.TestAccountStatsEqual(suite, &expected.Stats, &actual.Stats)
 }
 
-func TestTotalAccountsStatsEqual(expected, actual *forms.TotalAccountsStatsResponse, suite *suite.Suite) {
-	repository_tests.TestTotalAccountsStatsEqual(&expected.Stats, &actual.Stats, suite)
+func TestTotalAccountsStatsEqual(suite *suite.Suite, expected, actual *forms.TotalAccountsStatsResponse) {
+	repository_tests.TestTotalAccountsStatsEqual(suite, &expected.Stats, &actual.Stats)
 }
 
-func TestTotalCategoriesStatsEqual(expected, actual *forms.TotalCategoriesStatsResponse, suite *suite.Suite) {
-	repository_tests.TestTotalCategoriesStatsEqual(&expected.Stats, &actual.Stats, suite)
+func TestTotalCategoriesStatsEqual(suite *suite.Suite, expected, actual *forms.TotalCategoriesStatsResponse) {
+	repository_tests.TestTotalCategoriesStatsEqual(suite, &expected.Stats, &actual.Stats)
 }
