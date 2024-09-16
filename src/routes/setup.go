@@ -7,6 +7,7 @@ func SetupAllRoutes(router *gin.Engine) {
 	AddAccountRoutes(router)
 	AddCurrencyRoutes(router)
 	AddCategoryRoutes(router)
+	AddCategoryImageRoutes(router)
 	AddStatsRoutes(router)
 	AddTransactionRoutes(router)
 }

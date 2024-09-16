@@ -8,11 +8,13 @@ const (
 )
 
 type Category struct {
-	ID     ModelID      `gorm:"column:id;primaryKey;unique;autoIncrement"`
-	Name   string       `gorm:"column:name;unique"`
-	Type   CategoryType `gorm:"column:type"`
-	UserID ModelID      `gorm:"column:user_id"`
-	User   User         `gorm:"foreignKey:UserID"`
+	ID              ModelID       `gorm:"column:id;primaryKey;unique;autoIncrement"`
+	Name            string        `gorm:"column:name;unique"`
+	Type            CategoryType  `gorm:"column:type"`
+	UserID          ModelID       `gorm:"column:user_id"`
+	User            User          `gorm:"foreignKey:UserID"`
+	CategoryImageID ModelID       `gorm:"column:category_image_id"`
+	CategoryImage   CategoryImage `gorm:"foreignKey:CategoryImageID"`
 }
 
 func (Category) TableName() string {

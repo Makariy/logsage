@@ -1,4 +1,5 @@
 .idea
 .git
+.env
 src/.dockerignore
 src/go_build_main_go
