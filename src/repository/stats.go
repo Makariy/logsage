@@ -286,7 +286,10 @@ func queryTimeIntervalSeries(
 ) *gorm.DB {
 	return db.Table(""+
 		fmt.Sprintf(
-			"generate_series(?, ?, %s) as date_start",
+			"generate_series("+
+				"?::date + '1 second'::interval, "+
+				"?::date - '1 second'::interval, "+
+				"%s) as date_start",
 			renderQueryInterval(interval),
 		), fromDate, toDate,
 	)
