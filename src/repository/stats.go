@@ -287,8 +287,8 @@ func queryTimeIntervalSeries(
 	return db.Table(""+
 		fmt.Sprintf(
 			"generate_series("+
-				"?::date, "+
-				"?::date - '1 day'::interval, "+
+				"DATE_TRUNC('day', ?::date), "+
+				"DATE_TRUNC('day', ?::date), "+
 				"%s) as date_start",
 			renderQueryInterval(interval),
 		), fromDate, toDate,
@@ -304,7 +304,7 @@ func queryJoinTransactionsByUserInInterval(
 		"LEFT JOIN transaction ON date_start <= transaction.date "+
 			"AND "+
 			fmt.Sprintf(
-				"transaction.date <= DATE_TRUNC('day', date_start + %s + '1 day')",
+				"transaction.date <= date_start + %s + '1 day'",
 				renderQueryInterval(interval),
 			)+
 			" AND transaction.user_id = ?", userID,
