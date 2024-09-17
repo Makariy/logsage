@@ -27,8 +27,9 @@ func CreateTestCategory(
 	userID models.ModelID,
 	categoryName string,
 	categoryType models.CategoryType,
+	categoryImageID models.ModelID,
 ) *models.Category {
-	category, err := repository.CreateCategory(userID, categoryName, categoryType)
+	category, err := repository.CreateCategory(userID, categoryName, categoryType, categoryImageID)
 	if err != nil {
 		panic("could not create test category")
 	}

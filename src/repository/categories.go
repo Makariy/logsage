@@ -8,11 +8,13 @@ func CreateCategory(
 	userID models.ModelID,
 	name string,
 	categoryType models.CategoryType,
+	categoryImageID models.ModelID,
 ) (*models.Category, error) {
 	category := models.Category{
-		Name:   name,
-		Type:   categoryType,
-		UserID: userID,
+		Name:            name,
+		Type:            categoryType,
+		UserID:          userID,
+		CategoryImageID: categoryImageID,
 	}
 	return CreateModel(&category)
 }
@@ -29,13 +31,15 @@ func PatchCategory(
 	categoryID models.ModelID,
 	name string,
 	categoryType models.CategoryType,
+	categoryImageID models.ModelID,
 	userID models.ModelID,
 ) (*models.Category, error) {
 	category := models.Category{
-		ID:     categoryID,
-		Name:   name,
-		Type:   categoryType,
-		UserID: userID,
+		ID:              categoryID,
+		Name:            name,
+		Type:            categoryType,
+		UserID:          userID,
+		CategoryImageID: categoryImageID,
 	}
 	return PatchModel(&category)
 }

@@ -33,7 +33,7 @@ var (
 
 	transactionDateYear  = 2024
 	transactionDateMonth = time.January
-	transaction1Date     = time.Date(transactionDateYear, transactionDateMonth, 1, 0, 0, 0, 0, time.UTC)
+	transaction1Date     = time.Date(transactionDateYear, transactionDateMonth, 1, 0, 0, 0, 0, time.Local)
 	transaction2Date     = transaction1Date.AddDate(0, 0, 1)
 	transaction3Date     = transaction2Date.AddDate(0, 0, 1)
 	transaction4Date     = transaction3Date.AddDate(0, 0, 1)

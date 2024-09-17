@@ -13,6 +13,8 @@ type RepositoryDefaultSuite struct {
 
 	User *models.User
 
+	CategoryImage *models.CategoryImage
+
 	FirstCurrency  *models.Currency
 	SecondCurrency *models.Currency
 
@@ -31,6 +33,7 @@ type RepositoryDefaultSuite struct {
 func (suite *RepositoryDefaultSuite) SetupDB() {
 	CreateTestDB()
 	models.MigrateModels(db_connector.GetConnection())
+	suite.CategoryImage, _ = repository.CreateModel[models.CategoryImage](&models.CategoryImage{FileName: "test.svg"})
 }
 
 func (suite *RepositoryDefaultSuite) CreateDefaultUser() {
@@ -47,11 +50,13 @@ func (suite *RepositoryDefaultSuite) CreateDefaultCategories() {
 		suite.User.ID,
 		data.FirstCategoryName,
 		data.FirstCategoryType,
+		suite.CategoryImage.ID,
 	)
 	suite.SecondCategory = CreateTestCategory(
 		suite.User.ID,
 		data.SecondCategoryName,
 		data.SecondCategoryType,
+		suite.CategoryImage.ID,
 	)
 }
 

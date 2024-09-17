@@ -28,10 +28,11 @@ func (suite *CategoryRoutesSuit) TearDownTest() {
 	suite.router.TearDownTest()
 }
 
-func getCategoryForm() []byte {
+func getCategoryForm(suite *CategoryRoutesSuit) []byte {
 	form := &forms.CategoryForm{
-		Name: data.FirstCategoryName,
-		Type: data.FirstCategoryType,
+		Name:            data.FirstCategoryName,
+		Type:            data.FirstCategoryType,
+		CategoryImageID: suite.router.Data.CategoryImage.ID,
 	}
 	stringForm, _ := json.Marshal(&form)
 	return stringForm
@@ -42,7 +43,7 @@ func (suite *CategoryRoutesSuit) TestHandleCreateCategory() {
 		suite.router.Router,
 		"POST",
 		"/category/create/",
-		getCategoryForm(),
+		getCategoryForm(suite),
 		&suite.router.AuthHeaders,
 	)
 	AssertResponseSuccess(201, resp, &suite.Suite)
@@ -90,7 +91,7 @@ func (suite *CategoryRoutesSuit) TestHandleGetAllCategories() {
 		suite.router.Router,
 		"GET",
 		"/category/all/",
-		getCategoryForm(),
+		getCategoryForm(suite),
 		&suite.router.AuthHeaders,
 	)
 	AssertResponseSuccess(200, resp, &suite.Suite)
@@ -167,7 +168,7 @@ func (suite *CategoryRoutesSuit) TestHandleDeleteCategory() {
 		suite.router.Router,
 		"DELETE",
 		fmt.Sprintf("/category/delete/%d/", category.ID),
-		getCategoryForm(),
+		getCategoryForm(suite),
 		&suite.router.AuthHeaders,
 	)
 	AssertResponseSuccess(200, resp, &suite.Suite)

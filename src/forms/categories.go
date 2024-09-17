@@ -17,8 +17,9 @@ func (CategoryImagesResponse) ListField() string {
 }
 
 type CategoryForm struct {
-	Name string              `json:"name" form:"name"`
-	Type models.CategoryType `json:"type" form:"type"`
+	Name            string              `json:"name" form:"name"`
+	Type            models.CategoryType `json:"type" form:"type"`
+	CategoryImageID models.ModelID      `json:"category_image_id" form:"category_image_id"`
 }
 
 type CategoryResponse struct {

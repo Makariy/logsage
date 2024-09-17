@@ -22,7 +22,12 @@ func (suite *CategoryRepositorySuit) TearDownTest() {
 }
 
 func (suite *CategoryRepositorySuit) TestCreateCategory() {
-	category, err := repository.CreateCategory(suite.base.User.ID, categoryName, categoryType)
+	category, err := repository.CreateCategory(
+		suite.base.User.ID,
+		categoryName,
+		categoryType,
+		suite.base.CategoryImage.ID,
+	)
 	if err != nil {
 		suite.Error(err)
 	}
@@ -37,7 +42,12 @@ func (suite *CategoryRepositorySuit) TestCreateCategory() {
 }
 
 func (suite *CategoryRepositorySuit) TestGetCategoryByID() {
-	category, err := repository.CreateCategory(suite.base.User.ID, categoryName, categoryType)
+	category, err := repository.CreateCategory(
+		suite.base.User.ID,
+		categoryName,
+		categoryType,
+		suite.base.CategoryImage.ID,
+	)
 	if err != nil {
 		suite.Error(err)
 	}
@@ -51,11 +61,21 @@ func (suite *CategoryRepositorySuit) TestGetCategoryByID() {
 }
 
 func (suite *CategoryRepositorySuit) TestGetAllCategories() {
-	first, err := repository.CreateCategory(suite.base.User.ID, categoryName, categoryType)
+	first, err := repository.CreateCategory(
+		suite.base.User.ID,
+		categoryName,
+		categoryType,
+		suite.base.CategoryImage.ID,
+	)
 	if err != nil {
 		suite.Error(err)
 	}
-	second, err := repository.CreateCategory(suite.base.User.ID, "Other category", models.EARNING)
+	second, err := repository.CreateCategory(
+		suite.base.User.ID,
+		"Other category",
+		models.EARNING,
+		suite.base.CategoryImage.ID,
+	)
 	if err != nil {
 		suite.Error(err)
 	}
@@ -81,7 +101,12 @@ func (suite *CategoryRepositorySuit) TestGetAllCategories() {
 }
 
 func (suite *CategoryRepositorySuit) TestPatchCategory() {
-	category, err := repository.CreateCategory(suite.base.User.ID, categoryName, categoryType)
+	category, err := repository.CreateCategory(
+		suite.base.User.ID,
+		categoryName,
+		categoryType,
+		suite.base.CategoryImage.ID,
+	)
 	if err != nil {
 		suite.Error(err)
 	}
@@ -91,7 +116,13 @@ func (suite *CategoryRepositorySuit) TestPatchCategory() {
 		newType models.CategoryType = "New type"
 	)
 
-	patched, err := repository.PatchCategory(category.ID, newName, newType, suite.base.User.ID)
+	patched, err := repository.PatchCategory(
+		category.ID,
+		newName,
+		newType,
+		suite.base.User.ID,
+		suite.base.CategoryImage.ID,
+	)
 	if err != nil {
 		suite.Error(err)
 	}
@@ -107,7 +138,12 @@ func (suite *CategoryRepositorySuit) TestPatchCategory() {
 }
 
 func (suite *CategoryRepositorySuit) TestDeleteCategory() {
-	category, err := repository.CreateCategory(suite.base.User.ID, categoryName, categoryType)
+	category, err := repository.CreateCategory(
+		suite.base.User.ID,
+		categoryName,
+		categoryType,
+		suite.base.CategoryImage.ID,
+	)
 	if err != nil {
 		suite.Error(err)
 	}
