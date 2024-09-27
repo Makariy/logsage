@@ -159,7 +159,7 @@ func (suite *StatsRepositorySuit) TestGetTimeIntervalStats() {
 	stats, err := repository.GetTimeIntervalStats(
 		suite.base.User.ID,
 		fromDate.Add(time.Hour),
-		toDate,
+		toDate.Add(time.Hour*24),
 		"day",
 		suite.base.FirstCurrency,
 	)
@@ -170,7 +170,7 @@ func (suite *StatsRepositorySuit) TestGetTimeIntervalStats() {
 		TimeStep: dayDuration,
 		DateRange: &forms.DateRange{
 			FromDate: fromDate.Add(time.Hour).Unix(),
-			ToDate:   toDate.Unix(),
+			ToDate:   toDate.Add(time.Hour * 24).Unix(),
 		},
 		IntervalStats: []*forms.TimeIntervalStat{
 			{

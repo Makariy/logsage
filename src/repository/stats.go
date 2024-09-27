@@ -288,7 +288,7 @@ func queryTimeIntervalSeries(
 		fmt.Sprintf(
 			"generate_series("+
 				"DATE_TRUNC('day', ?::date), "+
-				"DATE_TRUNC('day', ?::date), "+
+				"DATE_TRUNC('day', ?::date) - '1 second'::interval, "+
 				"%s) as date_start",
 			renderQueryInterval(interval),
 		), fromDate, toDate,
