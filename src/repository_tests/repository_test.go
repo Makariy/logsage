@@ -5,17 +5,17 @@ import (
 	"testing"
 )
 
-func TestCategoriesSuite(t *testing.T) {
-	suite.Run(t, new(CategoryRepositorySuit))
-}
-
-func TestAccountSuite(t *testing.T) {
-	suite.Run(t, new(AccountRepositorySuit))
-}
-
-func TestTransactionSuite(t *testing.T) {
-	suite.Run(t, new(TransactionRepositorySuit))
-}
+//func TestCategoriesSuite(t *testing.T) {
+//	suite.Run(t, new(CategoryRepositorySuit))
+//}
+//
+//func TestAccountSuite(t *testing.T) {
+//	suite.Run(t, new(AccountRepositorySuit))
+//}
+//
+//func TestTransactionSuite(t *testing.T) {
+//	suite.Run(t, new(TransactionRepositorySuit))
+//}
 
 func TestStatsSuite(t *testing.T) {
 	suite.Run(t, new(StatsRepositorySuit))

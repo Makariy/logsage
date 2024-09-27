@@ -1,7 +1,6 @@
 package repository_tests
 
 import (
-	"fmt"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/suite"
 	"main/forms"
@@ -159,19 +158,18 @@ func (suite *StatsRepositorySuit) TestGetTotalCategoriesStats() {
 func (suite *StatsRepositorySuit) TestGetTimeIntervalStats() {
 	stats, err := repository.GetTimeIntervalStats(
 		suite.base.User.ID,
-		fromDate,
+		fromDate.Add(time.Hour),
 		toDate,
 		"day",
 		suite.base.FirstCurrency,
 	)
 	suite.True(err == nil)
-	fmt.Println(fromDate)
 
 	dayDuration := int64(24 * time.Hour / time.Second)
 	expected := &forms.TimeIntervalStats{
 		TimeStep: dayDuration,
 		DateRange: &forms.DateRange{
-			FromDate: fromDate.Unix(),
+			FromDate: fromDate.Add(time.Hour).Unix(),
 			ToDate:   toDate.Unix(),
 		},
 		IntervalStats: []*forms.TimeIntervalStat{
@@ -184,7 +182,7 @@ func (suite *StatsRepositorySuit) TestGetTimeIntervalStats() {
 				},
 			},
 			{
-				TotalSpentAmount:  decimal.NewFromInt(300),
+				TotalSpentAmount:  decimal.NewFromInt(200),
 				TotalEarnedAmount: decimal.Zero,
 				DateRange: &forms.DateRange{
 					FromDate: fromDate.Unix() + dayDuration,
@@ -192,7 +190,7 @@ func (suite *StatsRepositorySuit) TestGetTimeIntervalStats() {
 				},
 			},
 			{
-				TotalSpentAmount:  decimal.NewFromInt(200),
+				TotalSpentAmount:  decimal.Zero,
 				TotalEarnedAmount: decimal.NewFromInt(3),
 				DateRange: &forms.DateRange{
 					FromDate: fromDate.Unix() + dayDuration*2,
@@ -201,7 +199,7 @@ func (suite *StatsRepositorySuit) TestGetTimeIntervalStats() {
 			},
 			{
 				TotalSpentAmount:  decimal.Zero,
-				TotalEarnedAmount: decimal.NewFromInt(7),
+				TotalEarnedAmount: decimal.NewFromInt(4),
 				DateRange: &forms.DateRange{
 					FromDate: fromDate.Unix() + dayDuration*3,
 					ToDate:   fromDate.Unix() + dayDuration*4,

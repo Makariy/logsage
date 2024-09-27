@@ -304,7 +304,7 @@ func queryJoinTransactionsByUserInInterval(
 		"LEFT JOIN transaction ON date_start <= transaction.date "+
 			"AND "+
 			fmt.Sprintf(
-				"transaction.date <= date_start + %s + '1 day'",
+				"transaction.date <= date_start + %s",
 				renderQueryInterval(interval),
 			)+
 			" AND transaction.user_id = ?", userID,
@@ -333,7 +333,7 @@ func getRawTimeIntervalStats(
 	tx := queryJoinAccountAndCurrency(
 		queryJoinCategory(
 			queryJoinTransactionsByUserInInterval(
-				queryTimeIntervalSeries(db, step, fromDate, toDate),
+				queryTimeIntervalSeries(db.Debug(), step, fromDate, toDate),
 				step,
 				userID,
 			),
